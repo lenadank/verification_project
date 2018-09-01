@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Wed Apr 02 15:23:18 IDT 2014
+markTmpDer=false
+builderNum=2
+outputDir=doc/
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=doc
+mainTexFile=cycles.tex
+outputFile=cycles.pdf
+langSpell=
+markDer=false
+srcDir=doc/

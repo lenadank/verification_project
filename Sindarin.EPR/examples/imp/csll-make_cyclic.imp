@@ -1,0 +1,25 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+j : V
+_between : V * V * V -> bool
+
+make_cyclic := program([
+    j := h ; i := h.n ;
+    while $i != null$ {$I$} (
+       j := i ;
+       i := i.n
+    ) ;
+	j.n := h
+ ])
+
+P := h != null & forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := h != null & forall u v w (_between(u,v,w) <-> between(u,v,w)) &
+     ntot_(j,i) & n*(h,j)
+
+Q := on_cycle(h) &
+ 	 forall u v ((between(h,u,v) & v != h) <-> (_between(h,u,v) & v != h))
+	 
+lemma(P -> wp(make_cyclic,Q))

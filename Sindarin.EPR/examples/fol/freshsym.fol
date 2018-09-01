@@ -1,0 +1,8 @@
+# @uses dtca_cycles
+
+a : V
+b : V
+
+Q := fresh(R*, fresh(w, provided(R* : V * V -> bool) & provided(w : V -> V) & provided(R*(a,b)) & w(b) = a))
+
+lemma(wp(program([if $true$ then a := null else skip]), Q))

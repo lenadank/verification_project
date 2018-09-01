@@ -1,0 +1,32 @@
+# @uses dtca
+
+# Inserts an element into a singly-linked list, whose head is h, at some undetermined position.
+
+e : V
+h : V
+i : V
+j : V
+
+nondet : bool
+
+n* : V * V -> bool
+
+prog := program([
+  i := h; j := null;
+  while $nondet & i != null$ {$I$} (
+    j := i;
+    i := i.n
+  ) ;
+  if $j = null$ then h := e else j.n := e; e.n := i
+ ])
+ 
+ 
+dtca(n*)
+
+
+I := ~n*(h,e) & e != null & (j != null -> n*(h,j) & (i != null -> n*(j,i)) & i != j) & (i != null -> n*(h,i)) & ~n*(j,e) & ntot_(e,null)
+
+P := h != null & e != null & ntot_(e,null) & ~n*(h,e)
+Q := true
+
+lemma(P -> wp(prog, Q))

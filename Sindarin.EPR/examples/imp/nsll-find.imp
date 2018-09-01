@@ -1,0 +1,42 @@
+# @uses dtca_nested
+
+i : V
+j : V
+t : V
+C : V -> bool
+h : V
+
+find := program([
+    i := h ; 
+    t := null ;
+	while $i != null & t = null$ { $I1$ } (
+      j := i;	
+      while $j != null & t = null$ { $I2$ } (
+	    if $C(j)$ then
+		  t := j
+		else
+		  j := j.r
+	  ) ;
+	  i := i.d
+    )	  
+ ])
+
+t_is_first_C := C(t) & [d*r*](h,t) & forall u (flat_between(h,u,t) & u != t -> ~C(u))
+ 
+P := h != null & l0(h) = h
+
+I1 := P & (i != null -> d*(h,i)) & 
+      ite(t=null, forall u (ite(i=null,[d*r*](h,u),flat_between(h,u,i) & u != i) -> ~C(u)), t_is_first_C)
+
+I2 := P & d*(h,i) & (j != null -> r*(i,j)) &
+      forall u ((flat_between(h,u,i) & u != i)  -> ~C(u)) &
+      ite(t=null, 
+	      forall u (r*(i,u) & (j!=null -> r+_(u,j)) -> ~C(u)),
+		  t_is_first_C)
+
+Q := ite(t=null, 
+         forall u ([d*r*](h,u) -> ~C(u)), 
+         t_is_first_C)
+
+
+lemma(P -> wp(find, Q))

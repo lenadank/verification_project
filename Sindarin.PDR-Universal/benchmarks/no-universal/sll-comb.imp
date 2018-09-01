@@ -1,0 +1,47 @@
+
+(h : V)
+(null : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(z0 : V) -> (z : V)
+
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+(exit0 : bool) -> (exit : bool)
+(nondet0 : bool) -> (nondet : bool)
+
+dtca(p*) & dtca(p*0)
+
+init     :=  h != null &
+             i = h & j = h &
+             z = null &
+             ~exit
+
+cond     :=  ~exit
+loopBody :=  program([
+                if $i != null$ then (
+                    z := new;
+                    if $z != null$ then (
+                       i.p := z;
+                       i := i.n
+                    )
+                    else skip
+                ) else (
+                    if $j != null$ then (
+                       if $nondet$ then
+                          j := j.n
+                       else (
+                          z := j.p;
+                          exit := true
+                       )
+                    ) else exit := true
+                )
+             ])
+
+post     := z != null
+bad      := ~cond & ~post
+

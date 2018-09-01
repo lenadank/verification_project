@@ -1,0 +1,46 @@
+
+wp_ea(`skip, Q) := Q
+wp_ea([x:=y](x, y), Q) := dr(x := y, Q)
+wp_ea([x:=null](x), Q) := dr(x := null, Q)
+wp_ea([x.n|=y](x, `n, y), Q) := x!=null & (k*(y,x) -> ms = null) &
+   dr(ms := ite(k*(y,x), x, ms),
+      mt := ite(k*(y,x), y, mt),
+      k*(u,v) := k*(u,v) | (y!=null & ~k*(y,x) & k*(u,x) & k*(y,v)), Q)
+wp_ea([x.n:=null](x, `n), Q) := x!=null & dr(
+   ms := ite(k*(x,ms) & k*(mt,x), null, ms), 
+   k*(u,v) := (k*(u,v) & (~k*(u,x) | k*(v,x))) | (~k*(u,x) & k*(u,ms) & k*(mt,v) & k*(v,x) & x != ms), Q)
+wp_ea([x:=y.n](x, y, `n), Q) := y != null &
+   exists z (cntot_(y,z) & dr(x := z, Q))
+wp_ea([;](s1, s2), Q) := wp_ea(s1, wp_ea(s2, Q))
+wp_ea(if(C, s1, s2), Q) := ite(C, wp_ea(s1, Q), wp_ea(s2, Q))
+wp_ea(assume(K), Q) := K -> Q
+wp_ea(return(x), Q) := dr(retval:=x, Q)
+wp_ea([x:=new](x), Q) :=
+   (forall z (z = null | alloc(z)) & dr(x := null, Q)) |
+   exists z ((z != null & ~alloc(z)) & dr(x := z, alloc(u) := alloc(u) | u=z, Q))
+wp_ea([r:=f(...)](_, free(x)), Q) := x != null & alloc(x) & dr(alloc(u) := alloc(u) & u!=x, Q)
+
+   
+
+wp_ae(`skip, Q) := Q
+wp_ae([x:=y](x, y), Q) := dr(x := y, Q)
+wp_ae([x:=null](x), Q) := dr(x := null, Q)
+wp_ae([x.n|=y](x, `n, y), Q) := x!=null & (k*(y,x) -> ms = null) &
+   dr(ms := ite(k*(y,x), x, ms),
+      mt := ite(k*(y,x), y, mt),
+      k*(u,v) := k*(u,v) | (y!=null & ~k*(y,x) & k*(u,x) & k*(y,v)), Q)
+wp_ae([x.n:=null](x, `n), Q) := x!=null & dr(
+   ms := ite(k*(x,ms) & k*(mt,x), null, ms), 
+   k*(u,v) := (k*(u,v) & (~k*(u,x) | k*(v,x))) | (~k*(u,x) & k*(u,ms) & k*(mt,v) & k*(v,x) & x != ms), Q)
+wp_ae([x:=y.n](x, y, `n), Q) := y != null &
+   forall z (cntot_(y,z) -> dr(x := z, Q))
+wp_ae([;](s1, s2), Q) := wp_ae(s1, wp_ae(s2, Q))
+wp_ae(if(C, s1, s2), Q) := ite(C, wp_ae(s1, Q), wp_ae(s2, Q))
+wp_ae(assume(K), Q) := K -> Q
+wp_ae(return(x), Q) := dr(retval:=x, Q)
+wp_ae([x:=new](x), Q) :=
+   (forall z (z = null | alloc(z)) -> dr(x := null, Q)) &
+   forall z ((z != null & ~alloc(z)) -> dr(x := z, alloc(u) := alloc(u) | u=z, Q))
+wp_ae([r:=f(...)](_, free(x)), Q) := x != null & alloc(x) & dr(alloc(u) := alloc(u) & u!=x, Q)
+wp_ae([r:=f(...)](flag, havoc(_)), Q) := dr(flag := true, Q) & dr(flag := false, Q)
+wp_ae([r:=f(...)](flag, cas(x,y,z)), Q) := ite(x = y, dr(flag := true, x := z, Q), dr(flag := false, Q))

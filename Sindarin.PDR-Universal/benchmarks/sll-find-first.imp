@@ -1,0 +1,19 @@
+
+program := program([
+    while $i != null & ~C(i)$ {$I$} (
+       i := i.n
+    )
+  ])
+  
+n* : V * V -> bool
+
+h : V
+(i0 : V) -> (i : V)
+
+(C : V -> bool)
+~C(null)
+
+init := i = h
+
+bad      := i = null & exists u (n*(h,u) & C(u))
+

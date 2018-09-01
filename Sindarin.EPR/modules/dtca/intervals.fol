@@ -1,0 +1,18 @@
+
+# Introducing intervals
+# ivlcc == [,]   ivlco == [,)
+# args are start point, end point, and reachability relation
+# operations:
+# ~ membership: in(element, interval)
+# ~ set equality: interval = interval
+in(u, ivlcc(a,b,n*)) := n*(a,u) & (b = null | n*(u,b))
+in(u, ivlco(a,b,n*)) := n*(a,u) & (b = null | n*(u,b) & u != b)
+in(u, S | T) := in(u,S) | in(u,T)
+in(u, S & T) := in(u,S) & in(u,T)
+(ivlco(a,b,r) = ivlco(c,d,s)) := forall u (in(u, ivlco(a,b,r)) <-> in(u, ivlco(c,d,s)))
+(ivlcc(a,b,r) = ivlcc(c,d,s)) := forall u (in(u, ivlcc(a,b,r)) <-> in(u, ivlcc(c,d,s)))
+(ivlcc(a,b,r) = ivlco(c,d,s)) := forall u (in(u, ivlcc(a,b,r)) <-> in(u, ivlco(c,d,s)))
+(ivlco(a,b,r) = ivlcc(c,d,s)) := forall u (in(u, ivlco(a,b,r)) <-> in(u, ivlcc(c,d,s)))
+
+
+sorted_ivl(ivl, n*, R) := forall u v (in(u,ivl) & in(v,ivl) & n*(u,v) -> R(u,v))

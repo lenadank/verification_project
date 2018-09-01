@@ -1,0 +1,24 @@
+# @uses dtca
+
+h : V
+i : V
+j : V
+n*: V * V -> bool
+dtca (n*)
+
+prog := program([
+    i := h ; j := null ;
+    while $i != null$ {$I$} (
+       j := i ;
+       i := i.n
+    )
+ ])
+ 
+
+
+I := (i != null -> n*(h,i)) &
+     ite(j = null, i = h, n*(h,j) & ntot_(j,i))
+
+Q := ite(h = null, j = null, n*(h,j) & ntot_(j,null))
+
+lemma(wp(prog,Q))

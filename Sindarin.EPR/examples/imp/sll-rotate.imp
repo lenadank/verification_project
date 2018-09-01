@@ -1,0 +1,41 @@
+# @uses dtca
+# @uses hoare
+# @uses base
+
+h : V
+i : V
+j : V
+t : V
+
+n* : V * V -> bool
+
+_n* : V * V -> bool
+_h : V
+
+
+prog := program([
+    i := h ; j := null ;
+    while $i != null$ {$I$} (
+      j := i ; i := i.n
+    ) ;
+    assert $ntot_(j,null) & n*(h,j)$ ;
+    if $h != j$ then ( 
+       t := h.n ;
+       h.n := null ;
+       j.n := h ;
+       h := t
+    )
+    else skip
+ ])
+
+dtca(n*)
+ 
+P := h != null &
+     eqrel(_n*, n*) & _h = h
+Q := forall u (_n*(_h,u) <-> n*(h,u)) & ntot_(_h,null) &
+     forall u v (u != _h & v != _h & _n*(_h,u) & _n*(_h,v) ->
+                 (_n*(u,v) <-> n*(u,v)))
+
+I := P & ite(j = null, i = h, n*(h,j) & ntot_(j,i))
+
+lemma(P -> wp(prog, Q))

@@ -1,0 +1,61 @@
+# insert h v ::=
+#    i := h
+#    j := null
+#    while i != null & i.v < v:
+#       j := i
+#       i := i.n
+#    if i = h:
+#       h = new Node
+#       h.n := i
+#    else:
+#       e = new Node
+#       j.n := e
+#       e.n := i
+#
+
+# @uses dtca
+# @uses hoare
+# @uses base
+
+R: V * V -> bool
+n*: V * V -> bool
+C: V -> bool
+i: V
+h: V
+j: V
+e: V
+
+
+
+insert:= program([
+    i := h ;
+    j := null ;
+    while $i != null & R(e, i)$ { $I$ } (
+       j := i ;
+       i := i.n
+    ) ;
+    if $j != null$ then (
+       j.n := null ;
+       j.n := e ;
+       e.n := i
+    )
+    else (
+       e.n := h ;
+       h := e
+    )
+ ])
+ 
+dtca(n*)
+forall u (~R(u,u)) & transitive(R)
+
+
+I := (i != null -> n*(h,i)) & 
+     (j != null -> n*(h,j) & ntot_(j,i)) &
+     forall m (n*(h,m) -> ~n*(i,m) -> R(e, m)) & P
+
+P := subrel(R, n*) & ~n*(h,e) & ntot_(e,null) &
+     forall u (C(u) <-> (n*(h,u) & u != null))
+Q := subrel(R, n*) &
+     forall u ((C(u) | u=e) <-> n*(h,u))
+
+verify(P,insert,Q)

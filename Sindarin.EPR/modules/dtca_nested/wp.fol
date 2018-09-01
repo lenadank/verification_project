@@ -1,0 +1,39 @@
+
+#
+# Convenience macros
+#
+n+_(u,v) := n+_(n*,u,v)
+n_(u,v) := n_(n*,u,v)
+ntot_(u,v) := ntot_(n*,u,v)
+
+# general wp
+wp(`skip, Q) := Q
+wp([x:=y](x, y), Q) := dr(x := y, Q)
+wp([x:=null](x), Q) := dr(x := null, Q)
+wp([;](s1, s2), Q) := wp(s1, wp(s2, Q))
+wp(if(C, s1, s2), Q) := ite(C, wp(s1, Q), wp(s2, Q))
+wp(assume(K), Q) := K -> Q
+wp(assert(K), Q) := K & Q
+wp(return(x), Q) := dr(retval:=x, Q)
+wp(while(C,I,body),Q) := I & valid(I & C -> wp(body,I)) & valid(I & ~C -> Q)
+
+# wp for <d>
+wp([x.n|=y](x, `d, y), Q) := ~d*(y,x) & l0(x)=x &
+							 forall u (r*(u,y) -> (u = y)) &
+                             dr(d*(u,v) := d*(u,v) | (y!=null & d*(u,x) & d*(y,v)), Q)
+wp([x.n:=null](x, `d), Q) := dr(d*(u,v) := d*(u,v) & (~d*(u,x) | d*(v,x)), Q)
+wp([x:=y.n](x, y, `d), Q) := y != null & forall z (dtot_(y,z) -> dr(x := z, Q))
+
+# wp for <r>
+wp([x.n|=y](x, `r, y), Q) := ~r*(y,x) & 
+							 forall u (d*(u,y) -> (u = y)) &
+                             dr(r*(u,v) := r*(u,v) | (y!=null & r*(u,x) & r*(y,v)), 
+							    l0(u) := ite(r*(y,u), l0(x), l0(u)),
+							    Q)
+wp([x.n:=null](x, `r), Q) := forall z (rtot_(x,z) -> dr(r*(u,v) := r*(u,v) & (~r*(u,x) | r*(v,x)), 
+							                             l0(u) := ite(r*(z,u), z, l0(u)),
+							                             Q))
+wp([x:=y.n](x, y, `r), Q) := y != null & forall z (rtot_(y,z) -> dr(x := z, Q))
+
+# destructive update
+[x.n:=y](x,n,y) := [;]([x.n:=null](x,n), [x.n|=y](x,n,y))

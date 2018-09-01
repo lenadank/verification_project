@@ -1,0 +1,52 @@
+#
+#[filter] := program([
+#    i := h ;
+#    j := null ;
+#    while $i != null$ {$I$} (
+#       if $C( i )$ then (
+#          t := i.n; j.n := null; j.n := t
+#       ) else j := i ; 
+#       i := i.n
+#    )
+#  ])
+#  
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(g0 : V) -> (g : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(C : V -> bool)
+
+init     :=  i = h & j = null &
+             g = null & k = null
+
+cond     :=  i != null
+loopBody :=  program([
+                if $~C(i)$ then (
+                   if $i = h$ then
+                      h := i.n
+                   else
+                      ( t := i.n; j.n := null; j.n := t );
+                   if $g = null$ then
+                      g := i
+                   else
+                      k.n := i;
+                   k := i;
+                   i := i.n;
+                   k.n := null
+                )
+                else (
+                   j := i;
+                   i := i.n
+                )
+             ])
+
+post     :=  true
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

@@ -1,0 +1,66 @@
+#
+#  h
+#   \    p     p     p
+#    [ ]-->[ ]-->[ ]-->[ ]
+#   n |  p
+#    [ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#
+
+# flatten(h)
+#	i := h;
+#	j := null;
+#	while $i != null$ {$I1$} (
+#		k := i;
+#		while $k != null$ {$I2$} (
+#			j := k;
+#			k := k.p
+#		) ;
+#		i := i.n; j.p := null; j.p := i
+#	)
+ 
+(h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(C : V -> bool)
+
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+(_n* : V * V -> bool)
+
+dtca(p*)
+dtca(p*0)
+dtca(_n*)
+
+init := i = h & j = null & k = h &
+     forall u v (n*(u,v) <-> _n*(u,v)) &
+     forall u v (_n*(h,u) & p*(u,v) -> u = v)
+
+cond := i != null
+loopBody := program([
+  t := i.n ;
+  if $C(i)$ then (
+    if $j != null$ then ( j.n := null ; k.p := i ) else skip ;
+    k := i
+#    i.n := null 
+  )
+  else skip;
+  j := i ;
+  i := t
+ ])
+
+post := forall u z v (_n*(h,u) & _n*(u,z) & _n*(z,v) & C(z) & n*(u,v) -> 
+                      u = z | v = z) &
+        forall u v (p*(h,u) & n*(u,v) -> _n*(h,v)) &
+        forall z u v (p*(h,z) & n*(z,u) & n*(u,v) -> _n*(u,v)) &
+        forall w z u v (p*(h,w) & p+_(w,z) & n*(w,u) & n*(z,v) -> _n*(u,v))
+# note: the converse cannot be proven with a universal invariant
+#       forall u (_n*(h,u) -> exists v (p*(h,v) & n*(v,u)))
+
+bad := ~ite(cond, wp_ae(loopBody,true), post)
+

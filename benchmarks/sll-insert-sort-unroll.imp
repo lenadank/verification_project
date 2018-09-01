@@ -1,0 +1,109 @@
+
+# insert(h, e) :=
+#   i := h; j := null;
+#   while $i != null & e < i$ (
+#     j := i; i := i.n
+#   )
+#   if $j != null$ then
+#     j.n = e
+#   else
+#     h := e
+#   e.n := i
+
+# insert_sort(l) :=
+#   res := null
+#   k := l
+#   while $k != null$ (
+#     insert(res, k)
+#     k := k.n
+#   )
+
+
+(l : V)
+(res0 : V) -> (res : V)
+(k0 : V) -> (k : V)
+
+(h0 : V) -> (h : V)
+(e0 : V) -> (e : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(n0* : V * V -> bool) -> (n* : V * V -> bool)
+(R : V * V -> bool)
+(x : V)
+
+(loc10 : bool) -> (loc1 : bool)
+(loc20 : bool) -> (loc2 : bool)
+(loc30 : bool) -> (loc3 : bool)
+(exit0 : bool) -> (exit : bool)
+(bug0 : bool) -> (bug : bool)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+init     := ~exit & loc1 & ~loc2 & ~loc3 &
+            res = null & k = l &
+            ~bug
+#l != null & e = l
+#            n*(l,x)
+#            (l != null -> n*(l,x))
+
+cond     := ~exit
+loopBody := program([
+               if $loc1$ then (
+                  if $k != null$ then (
+                     e := k;
+                     k := k.n;
+                     e.n := null;
+                     h := res;
+                     i := h;
+                     j := null;
+                     loc1 := false;
+                     loc2 := true;
+                     loc3 := false
+                  )
+                  else
+                     exit := true
+                )
+                else
+               (if $loc2$ then (
+                  if $i != null & e = null$ then bug := true else skip;
+                  if $i != null & R(i,e)$ then (
+                     j := i;
+                     i := i.n
+                  )
+                  else (
+                     loc1 := false;
+                     loc2 := false;
+                     loc3 := true
+                  )
+                )
+                else 
+               if $loc3$ then (
+                  (if $j != null$ then (
+                     j.n := null;
+                     j.n := e )
+                  else (
+                     h := e ) ;
+                  e.n := null;
+                  e.n := i
+                  );
+                  res := h;
+                  loc1 := true;
+                  loc2 := false;
+                  loc3 := false
+                )
+                else skip )
+            ])
+
+post     := sorted(ivlco(res,null,n*))
+#            n*(res,x)
+#            forall y (n*(res,y) <-> n*(l,y))
+#bad      := bug
+#bad      := cond & ~wp(loopBody,true)
+#bad      := (loc1 | loc2 | loc3 ) & cond & ~wp(loopBody,true)
+bad      := ~ite(cond, wp(loopBody,true), post)
+
+#bad      := ~ite(cond, wp(loopBody,true), post)
+

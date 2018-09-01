@@ -1,0 +1,5 @@
+
+
+class FolSemanticError(ValueError):
+    pass
+

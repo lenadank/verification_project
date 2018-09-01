@@ -1,0 +1,33 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+j : V
+_between : V * V * V -> bool
+C : V -> bool
+
+find_last_C := program([
+    i := h.n ; 
+	if $C(h)$ then 
+	  j := h 
+	else 
+	  j := null ; 
+    while $i != h$ {$I$} (
+       if $C(i)$ then j := i else ( skip ) ;
+       i := i.n
+    )
+ ])
+
+P := on_cycle(h) & 
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := on_cycle(h) & n*(h,i) &
+     ite(j = null, ~C(h) & forall u (between_s(h,u,i) -> ~C(u)), 
+                   n*(h,j) & C(j) & forall u (s_between_s(j,u,i)  -> ~C(u))) & 
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+Q := ite(j = null, forall u (n*(h,u) -> ~C(u)), 
+                   n*(h,j) & C(j) &  forall u (s_between_s(j,u,h)  -> ~C(u))) & 
+	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+lemma(P -> wp(find_last_C,Q))

@@ -1,0 +1,23 @@
+# @uses dtca_cycles
+# @uses hoare
+
+a : V
+b : V
+c : V
+d : V
+
+ab(u) := a=u | b=u
+abcd(u) := a=u | b=u | c=u | d=u
+
+P := a != b & a != c & a != d & b != c & b != d & c != d &
+     forall u (abcd(u) -> u != null & forall v (n*(u,v) -> u=v))
+
+Q := forall u v (ab(u) & ab(v) -> n*(u,v))
+
+prog1 := [;]([x.n|=y](a,n,b),
+         [;]([x.n|=y](b,n,c),
+         [;]([x.n|=y](c,n,d),
+             [x.n|=y](d,n,a))))
+            
+
+verify(P, prog1, Q)

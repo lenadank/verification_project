@@ -1,0 +1,52 @@
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(g : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(nondet0 : bool) -> (nondet : bool)
+(exit0 : bool) -> (exit : bool)
+
+# ghost variables
+(L : V * V -> bool)
+(H : V)
+
+init      :=  h != null & i = h & k = null & 
+              j = g &
+              (forall z (~n*(h,z) | ~n*(g,z))) & 
+              H = h & (forall u v (L(u,v) <-> n*(u,v))) &
+              ~exit
+
+cond      :=  ~exit
+loopBody  :=  program([
+       if $i != null$ then (
+          if $j = null | nondet$ then (
+             k := i;
+             i := i.n
+          )
+          else (
+             if $k != null$ then (
+                k.n := j;
+                k := j;
+                j := j.n;
+                k.n := i
+             )
+             else (
+                h := j;
+                j := j.n;
+                h.n := i;
+                k := h
+             )
+          )
+       )
+       else ( k.n := j; exit := true )
+ ])
+
+post      :=  forall z (z != null -> (n*(h,z) <-> (L(H,z) | L(g,z))))
+bad       :=  ~ite(cond, wp_ae(loopBody,true), post)
+

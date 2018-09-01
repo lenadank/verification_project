@@ -1,0 +1,65 @@
+# @uses dtca
+# @uses base
+# @uses hoare
+
+#
+# # (recursive version)
+# find(x) := (
+#	i := x.p ;
+#	if $i != null$ then (
+#		i := find(i) ;
+#		x.p := i
+#	)
+#	else (
+#		i := x
+#	) ;
+#	return i
+# )
+#
+
+# ite(p*(u,x), v=i, A(u,v)))$
+
+[find-prog] := program([[
+	i := x.p ;
+	if $i != null$ then (
+		i := find(i) [$B | p*_$];
+		x.p := i
+	)
+	else i := x ;
+	return i
+ ]])
+ 
+_is_root(u) := forall v (_p*(u,v) -> u=v)
+
+[find-P](x,A) := x != null
+[find-M](x,A) := is_cp_totalN(A,x,_p*)
+[find-Q](x,A) := _p*(x,retval) & _is_root(retval) & 
+	forall u v (u!=null & v!=null & A(u,u) & A(v,v) -> (p*(u,v) <-> u=v | v=retval)) &
+	[frame-adapt](A, _p* > p*)
+
+# (IH)
+wp([r:=f(...)](retvar, find(x)) / (A | p*_), Q) :=
+	[wp call(1field)](retvar, _p* > p* > p*_, [find-P](x,A), [find-Q](x,A) & [find-M](x,A), Q)
+
+
+#
+x : V
+i : V
+z0 : V
+p* : V * V -> bool
+p*_ : V * V -> bool
+_p* : V * V -> bool
+
+en0 : V -> V
+A : V * V -> bool
+B : V * V -> bool
+
+[N constants] := []|z0
+
+dtca(p*)
+
+is_cp_total0(R_en0,x,p*)
+P := eqrel(_p*,p*) & x!=null
+Q := [find-Q](x,R_en0)
+
+verify(P, [find-prog], Q)

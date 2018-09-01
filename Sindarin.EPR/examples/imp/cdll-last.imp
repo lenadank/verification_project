@@ -1,0 +1,26 @@
+# @uses dtca_cycles_dbl
+
+h : V
+i : V
+j : V
+_between : V * V * V -> bool
+
+get_last := program([
+    i := h ; j := null ;
+    while $i != h | j = null$ {$I$} (
+       j := i ;
+       i := i.n1
+    )
+ ])
+ 
+P := on_cycle1(h) &
+ 	 forall u v w (_between(u,v,w) <-> between1(u,v,w))
+
+I := on_cycle1(h) & n1*(h,i) &
+     ite(j = null, i = h, n1*(h,j) & n1tot_(j,i)) &
+ 	 forall u v w (_between(u,v,w) <-> between1(u,v,w))
+
+Q :=  n1*(h,j) & n1tot_(j,h) &
+ 	 forall u v w (_between(u,v,w) <-> between1(u,v,w))
+
+lemma(P -> wp(get_last,Q))

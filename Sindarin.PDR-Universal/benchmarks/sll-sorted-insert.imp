@@ -1,0 +1,60 @@
+#
+# insert(h, e) :=
+#   i := h ; j := null ;
+#   while $i != null & e < i$ (
+#      j := i ; i := i.n
+#   )
+#   if $j != null$ then
+#      j.n := e
+#   else
+#      h := e;
+#   e.n := i
+#    
+
+
+(null : V)
+(n* : V * V -> bool)
+
+(h : V)
+(e : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(R : V * V -> bool)
+
+# ghost variables
+(L : V * V -> bool)
+(H : V)
+
+dtca(L)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+
+init     := i = h & j = null &
+            e != null & ~n*(h,e) & ntot_(e,null) &
+            sorted(ivlco(h,null,n*)) &
+            H = h & (forall u v (L(u,v) <-> n*(u,v)))
+
+cond     := i != null & R(i,e)
+loopBody := program([ j := i; i := i.n ])
+
+epilogue := program([
+               if $j != null$ then
+                  j.n := e
+               else
+                  h := e;
+               e.n := i
+            ])
+
+Q        := h != null & sorted(ivlco(h,null,n*)) &
+            n*(h,e) &
+            forall z (z != null -> (n*(h,z) <-> (L(H,z) | z = e)))
+
+post     := wp_ae(epilogue, Q)
+bad      := ~ite(cond, wp_ae(loopBody,true), post)
+

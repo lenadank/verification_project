@@ -1,0 +1,28 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+j : V
+
+_between : V * V * V -> bool
+
+make_noncyclic := program([
+    i := h ; j := null ;
+    while $i != h | j = null$ {$I$} (
+       j := i ;
+       i := i.n
+    ) ;
+	j.n := null
+ ])
+ 
+P := on_cycle(h) &
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := on_cycle(h) & n*(h,i) &
+     ite(j = null, i = h, n*(h,j) & ntot_(j,i)) &
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+Q :=  ~on_cycle(h) & 
+	   forall u v (v != h -> (_between(h,u,v)) <-> (n*(u,v) & n*(h,u)))
+	   
+lemma(P -> wp(make_noncyclic,Q))

@@ -1,0 +1,64 @@
+wp(`skip, Q) := Q
+wp([x:=null](x), Q) := dr(x := null, Q)
+wp([x:=y](x, y), Q) := dr(x := y, Q)
+wp([;](s1, s2), Q) := wp(s1, wp(s2, Q))
+wp(if(C, s1, s2), Q) := ite(C, wp(s1, Q), wp(s2, Q))
+wp(assume(K), Q) := K -> Q
+wp(assert(K), Q) := K & Q
+wp(return(x), Q) := dr(retval:=x, Q)
+wp(while(C,I,body),Q) := I & valid(I -> ite(C, wp(body,I), Q))
+
+wp([x.n|=y](x,`n1,y),Q) := 
+				fresh(nk1*, nm1, nk10, nkm10, 
+				provided(nk1* : V * V -> bool) &	provided(nm1 : V * V -> bool) & 
+				provided(nk10 : V -> V) & provided(nkm10 : V -> V) & 
+				provided(forall u v (nk1*(u,v) <-> (k1*(u,v) | (y !=null & ~k1*(y,x) & k1*(u,x) & k1*(y,v))))) &
+				provided(forall u v (nm1(u,v)  <-> (m1(u,v) | (k1*(y,x) & u = x & v = y)))) &
+				provided(forall u v (nk10(u) = v  <->  ite(k1*(y,u) & k1*(u,x), v = x, v = k10(u)))) &
+				provided(forall u v (nkm10(u) = v <->  ite(k1*(y,u) & k1*(u,x), v = y, v = km10(u))))
+				-> 
+				dr(k1*(u,v) := nk1*(u,v), m1(u,v) := nm1(u,v), k10(u) := nk10(u), km10(u) := nkm10(u), 
+				overlapping_cycles & Q))
+
+wp([x.n|=y](x,`n2,y),Q) := 
+				fresh(nk2*, nm2, nk20, nkm20, 
+				provided(nk2* : V * V -> bool) &	provided(nm2 : V * V -> bool) & 
+				provided(nk20 : V -> V) & provided(nkm20 : V -> V) & 
+				provided(forall u v (nk2*(u,v) <-> (k2*(u,v) | (y !=null & ~k2*(y,x) & k2*(u,x) & k2*(y,v))))) &
+				provided(forall u v (nm2(u,v)  <-> (m2(u,v) | (k2*(y,x) & u = x & v = y)))) &
+				provided(forall u v (nk20(u) = v  <->  ite(k2*(y,u) & k2*(u,x), v = x, v = k20(u)))) &
+				provided(forall u v (nkm20(u) = v <->  ite(k2*(y,u) & k2*(u,x), v = y, v = km20(u))))
+				-> 
+				dr(k2*(u,v) := nk2*(u,v), m2(u,v) := nm2(u,v), k20(u) := nk20(u), km20(u) := nkm20(u), 
+				overlapping_cycles & Q))
+					  
+wp([x:=y.n](x,y,`n1),Q) := y != null &
+						  fresh(z, provided(z: V) & provided(n1tot_(y,z)) -> dr(x := z, Q))
+wp([x:=y.n](x,y,`n2),Q) := y != null &
+						  fresh(z, provided(z: V) & provided(n2tot_(y,z)) -> dr(x := z, Q))
+
+wp([x.n:=null](x,`n1),Q) := 
+				x != null &
+				fresh(nk1*, nm1, nk10, nkm10, 
+				provided(nk1* : V * V -> bool) &	provided(nm1 : V * V -> bool) & 
+				provided(nk10 : V -> V) & provided(nkm10 : V -> V) & 
+				provided(forall u v (nk1*(u,v) <-> (u = v | (x != u & k1*(u,v) & k1*(v,x) )| ( ~ k1*(u,x) & k1*(u,v)) | (~ k1*(u,x) & n1*(u,v) & k1*(v,x))))) &
+				provided(forall u v (nm1(u,v) <->  m1(u,v) & ~k1*(v,x))) &
+				provided(forall u v (nk10(u) = v  <->  ite(nk1*(u,x), v = u, v = k10(u)))) &
+				provided(forall u v (nkm10(u) = v <->  ite(nk1*(u,x), v = u, v = km10(u))))
+				-> 
+				dr(k1*(u,v) := nk1*(u,v), m1(u,v) := nm1(u,v), k10(u) := nk10(u), km10(u) := nkm10(u), Q))
+				
+wp([x.n:=null](x,`n2),Q) := 
+				x != null &
+				fresh(nk2*, nm2, nk20, nkm20, 
+				provided(nk2* : V * V -> bool) &	provided(nm2 : V * V -> bool) & 
+				provided(nk20 : V -> V) & provided(nkm20 : V -> V) & 
+				provided(forall u v (nk2*(u,v) <-> (u = v | (x != u & k2*(u,v) & k2*(v,x) )| ( ~ k2*(u,x) & k2*(u,v)) | (~ k2*(u,x) & n2*(u,v) & k2*(v,x))))) &
+				provided(forall u v (nm2(u,v) <->  m2(u,v) & ~k2*(v,x))) &
+				provided(forall u v (nk20(u) = v  <->  ite(nk2*(u,x), v = u, v = k20(u)))) &
+				provided(forall u v (nkm20(u) = v <->  ite(nk2*(u,x), v = u, v = km20(u))))
+				-> 
+  				dr(k2*(u,v) := nk2*(u,v), m2(u,v) := nm2(u,v), k20(u) := nk20(u), km20(u) := nkm20(u), Q)) 
+
+[x.n:=y](x,n,y) := [;]([x.n:=null](x,n),[x.n|=y](x,n,y))

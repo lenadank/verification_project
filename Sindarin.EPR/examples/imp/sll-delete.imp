@@ -1,0 +1,45 @@
+# @uses dtca
+
+C : V -> bool
+x : V
+y: V
+h : V
+i : V
+j : V
+t : V
+
+n* : V * V -> bool
+
+
+prog := program([
+   i := h ; j := null ; t := null ;
+   while $i != null & t = null$ {$I$} (
+      if $C(i)$ then t := i
+      else (
+         j := i ; i := i.n
+      )
+   ) ;
+   if $i != null$ then (
+      if $j = null$ then h := i.n
+      else ( t := i.n ; j.n := null ; j.n := t )
+   )
+   else skip
+ ])
+
+dtca(n*)
+
+~C(null)
+
+x != null & y != null
+
+I := n*(h,x) & n*(x,y) &
+     (i != null -> n*(h,i)) &
+     ite(j = null, i=h, n*(h,j) & ntot_(j,i)) &
+     (forall m (n*(h,m) -> ~n*(i,m) -> ~C(m))) &
+     (t != null -> C(i)) 
+     
+P := n*(h,x) & n*(x,y) 
+Q := n*(x,y) <-> (x = y | y != i)
+
+lemma(P -> wp(prog,Q))
+

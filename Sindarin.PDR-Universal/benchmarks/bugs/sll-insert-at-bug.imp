@@ -1,0 +1,60 @@
+#
+# void insert_at(List e, List h, List x) {
+#    @requires h ≠ null ∧ e ≠ null ∧ e⟨n*⟩null ∧ h⟨n*⟩x ∧ x⟨n+⟩null 
+#    @ensures h ≠ null ∧ h⟨n*⟩e ∧ e⟨n⟩x ∧ x⟨n*⟩null
+#  p = h;
+#  q = null;
+#  while (p != x && p !=null) do {
+#    q = p;
+#    p = p→n; }
+#  q→n = e;
+#  e→n = p 
+# }
+#
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h : V)
+(e : V)
+
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+
+(x : V)
+
+init     :=   h != null & (n*(h,x) | x = null) &
+# bug: missing specification
+#              e != null & ~n*(h,e) & ntot_(e,null) &
+              x != h &
+              p = h & q = null
+
+cond     :=   p != x & p != null
+loopBody :=   program([ q := p; p := p.n ])
+
+Q        :=   h != null & n*(h,e) & ntot_(e,x)
+post     :=   wp_ae(program([ q.n := e; e.n := p ]), Q)
+bad      :=   ~ite(cond, wp_ae(loopBody,true), post)
+
+
+
+#
+# Output:
+#
+# R[2] =
+# And(Not(And(n*(h, x), Not(n*(p, x)))),
+#    Not(And(n*(h, e))),
+#    Not(And(n*(h, x), p != h, Not(n*(q, x)))),
+#    Not(And(n*(x, h))),
+#    Not(And(q == x, p != h)),
+#    Not(And(p == null, Not(nqnull))),
+#    Not(And(x != null, Not(n*(h, x)))),
+#    Not(And(e == null)),
+#    Not(And(Not(nenull))),
+#    Not(And(Not(n*(h, q)), p != h)),
+#    Not(And(p != null, Not(n*(h, p)))))
+#
+# PDR: 28.37s
+# N = 3
+# 17 iterations
+#

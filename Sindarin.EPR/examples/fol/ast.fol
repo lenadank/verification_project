@@ -1,0 +1,29 @@
+# @uses dtca
+
+
+# Node a, b, c;
+# { ~b<n*>a & ~c<n*>b }
+# a.n := b ;
+# b.n := c
+# { a<n*>c }
+
+
+a : V
+b : V
+c : V
+n* : V * V -> bool
+
+dtca(n*)
+
+stmt1 := [x.n|=y](a,n,b)
+[program-ast] := 
+   [;](
+      [x.n:=y](a,n,b),
+      [x.n:=y](b,n,c))
+      
+P := ~n*(b,a) & ~n*(c,b) & ~n*(c,a) & a != null & b != null & c != null
+Q := n*(a,c)
+
+#lemma(P -> wp(stmt1, Q))
+lemma(P -> wp([program-ast], Q))
+ 

@@ -1,0 +1,44 @@
+# @uses base dtcc1_ea
+
+k* : V * V -> bool
+ms : V
+mt : V
+
+h : V
+e : V
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+tmp : V
+
+# ghost
+_k* : V * V -> bool
+_ms : V
+_mt : V
+_h : V
+
+
+dtcc1(k*,ms,mt)
+dtcc1(_k*,_ms,_mt)
+
+_n*(u,v) := n*(_k*,_ms,_mt,u,v)
+
+init     :=  on_cycle(h) & e != null &
+             j = h & cntot_(h,i) & 
+             h != e &
+             _ms = ms & _mt = mt & eqrel(_k*,k*) & _h = h
+
+
+program  := program([
+   while $i != h & i != e$ {$I$} (
+      j := i ; i := i.n
+   ) ;
+   if $i != h$ then
+      ( tmp := i.n ;
+        j.n := tmp ;
+        i.n := null )
+   else
+      skip
+ ])
+
+post     :=  true

@@ -1,0 +1,31 @@
+# @uses dtca_cycles_dbl
+# @uses hoare
+# @uses base
+
+a : V
+b : V
+# c : V
+# d : V
+
+
+ab(u) := a=u | b=u
+abcd(u) := a=u | b=u | c=u | d=u
+
+#P := a != b & a != c & a != d & b != c & b != d & c != d &
+#     forall u (abcd(u) -> u != null & forall v (n1*(u,v) | n2*(u,v) -> u=v))
+
+P := a != b & 
+     forall u (ab(u) -> u != null & forall v (n1*(u,v) | n2*(u,v) -> u=v)) &
+	 forall v (~self_loop1(v) & ~self_loop2(v))
+
+Q :=  n2*(b,a)
+
+
+prog1 := [;]([x.n:=y](a,n1,b),
+         [;]([x.n:=y](b,n1,a),
+         [;]([x.n:=y](a,n2,b),
+             [x.n:=y](b,n2,a))))
+
+
+verify(P, prog1, Q)
+

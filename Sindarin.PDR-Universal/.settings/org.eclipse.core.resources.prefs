@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/epr_pdr.py=utf-8
+encoding//src/horn_blasting.py=utf-8
+encoding//src/learning/learning_new.py=utf-8
+encoding//src/learning/learning_pending_root_marked_general.py=utf-8
+encoding//src/learning/learning_strong.py=utf-8
+encoding//src/report.py=utf-8
+encoding//src/spanning_local.py=utf-8
+encoding//src/z3support/adapter.py=utf-8

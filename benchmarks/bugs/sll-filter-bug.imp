@@ -1,0 +1,63 @@
+
+[filter] := program([
+    i := h ;
+    j := null ;
+    while $i != null$ {$I$} (
+       if $~C(i)$ then
+          ( t := i.n; j.n := null; j.n := t )
+       else j := i; 
+       i := i.n
+    )
+  ])
+  
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(C : V -> bool)
+
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+# ghost variables:
+(H : V)
+(L : V * V -> bool)
+
+init     :=  i = h & j = null &
+             H = h &
+             (forall u v (L(u,v) <-> n*(u,v))) &
+             (forall v (h != null -> (n*(h,v) -> alloc(v)))) &
+             ~alloc(null)
+
+cond     :=  i != null
+loopBody :=  program([
+                if $~C(i)$ then (
+                   (if $i = h$ then
+# correct:            h := i.n
+# buggy:
+                      skip
+                   else (
+                      t := i.n;
+                      j.n := null;
+                      j.n := t
+                   ));
+                   void := free(i)
+                )
+                else
+                   j := i;
+                i := i.n
+             ])
+
+# Safety property specifies three aspects of the program:
+# 1) the result contains only elements satisfying C and no new elements were added;
+# 2) the absence of memory leaks;
+# 3) the stability of the procedure (preserves the order of elements).
+
+post     :=  (forall z (h != null -> (n*(h,z) <-> L(H,z) & C(z) & alloc(z)))) &
+             (forall z (L(H,z) & ~C(z) -> ~alloc(z))) &
+             (forall x y (L(H,x) & L(x,y) & C(x) & C(y)-> n*(x,y)))
+
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

@@ -1,0 +1,79 @@
+# @uses dtca
+# @uses base
+
+#
+# The recursive version of 'filter' goes like that:
+#
+# filter(h) :=
+# 	t := filter(h.n)
+#	if C(h):
+#		h.n := t
+#	else:
+#		h.n := null
+#		h := t
+#	return h
+#
+
+[filter-prog] := program([[
+	if $h != null$ then (
+		i := h.n ;
+		t := filter(i) [$B | n*_$] ;
+		if $C(h)$ then
+			h.n := t
+		else (
+			h.n := null;
+			h := t
+		)
+	) else skip ;
+	return h
+ ]])
+
+# That's the spec...
+[filter-P](_h, A) := true
+[filter-M](h, A) := is_cp_totalN(A, h, _n*)
+[filter-Q](h, A) :=
+#	dtca(n*) &
+	forall z (n*(retval,z) <-> _n*(h,z) & C(z))
+	& forall u v (_n*(h,u) & _n*(h,v) & C(u) & C(v) -> (n*(u,v) <-> _n*(u,v)))
+	& forall z (_n*(h,z) & ~C(z) -> (forall w (n*(z,w) <-> z=w)))
+	& [frame-adapt](A, _n* > n*)
+    
+wp([r:=f(...)](retvar, filter(h)) / (A | n*_), Q) :=
+	[wp call(1field)](retvar, _n* > n* > n*_, [filter-P](h,A), [filter-Q](h,A) & [filter-M](h,A), Q)
+			
+			       
+
+# (IH)
+#[wp filter](h, _h, A, n*_, Q) :=
+#	[wp call(1field)](h, _n* > n* > n*_, [filter-P](_h, A), [filter-Q](_h, A), Q)
+	
+h : V
+_h : V
+t : V
+eta : V
+C : V -> bool
+n* : V * V -> bool
+n*_ : V * V -> bool
+_n* : V * V -> bool
+n*2 : V * V -> bool
+B : V * V -> bool
+en0 : V -> V
+
+null : V
+
+z0 : V
+[N constants] := []|z0
+
+dtca(n*)
+
+#forall u v w (R_en0(u,v) & R_en0(u,w) -> v=w)
+#forall u v (R_en0(u,v) -> R_en0(v,v))
+
+P := _h = h & eqrel(_n*, n*)
+Q := [filter-Q](_h, R_en0) 
+     & forall u v w (_n*(_h,u) & _n*(_h,v) & _n*(_h,w) &
+		n_(u,w) & n_(v,w) -> u=v | w=t | w=h)
+
+is_cp_total0(R_en0, h, n*)
+
+lemma(P -> wp([filter-prog], Q))

@@ -1,0 +1,13 @@
+
+x : V
+f : V -> V
+g : V -> V
+h : V -> V
+
+eval(call(f), x) := f(x)
+eval([;](s1, s2), x) := eval(s2, eval(s1, x))
+eval(let(f := v, e), x) := dr(f(u) := eval(v,u), eval(e, x))  
+
+
+lemma(eval([;](call(f), call(g)), x) = g(f(x)))
+lemma(eval(let(f := [;](call(g), call(h)), call(f)), x) = h(g(x)))

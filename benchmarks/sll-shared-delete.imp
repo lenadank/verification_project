@@ -1,0 +1,55 @@
+# Two lists over a common set of nodes.
+# Delete given x from the both lists.
+
+(hn : V)
+(hp : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+
+(x : V)
+
+(in0 : V) -> (in : V)
+(jn0 : V) -> (jn : V)
+(ip0 : V) -> (ip : V)
+(jp0 : V) -> (jp : V)
+
+(findn0 : bool) -> (findn : bool)
+(findp0 : bool) -> (findp : bool)
+
+dtca(p*) & dtca(p*0)
+
+init        :=  hn != null & in = hn & jn = null &
+                hp != null & ip = hp & jp = null &
+                forall v (n*(hn, v) <-> p*(hp, v)) &
+                n*(hn,x) & p*(hp,x) &
+                findn & findp
+
+cond        :=  findn | findp
+loopBody    :=  program([
+                   (if $findn$ then (
+                      if $in != x & in != null$ then
+                         (jn := in; in := in.n)
+                      else
+                         findn := false)
+                    else skip);
+                   (if $findp$ then (
+                      if $ip != x & ip != null$ then
+                         (jp := ip; ip := ip.p)
+                      else
+                         findp := false)
+                    else skip)
+                ])
+
+Q           :=  ~n*(hn,x) & ~p*(hp,x) &
+                forall v (n*(hn, v) <-> p*(hp, v))
+
+epilogue    :=  program([
+                   tn := in.n;
+                   if $jn != null$ then jn.n := tn else hn := tn;
+                   tp := ip.p;
+                   if $jp != null$ then jp.p := tp else hp := tp
+                ])
+
+post        :=  wp_ae(epilogue, Q)
+bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
+

@@ -1,0 +1,39 @@
+#
+# void insert_at(List e, List h, List x) {
+#    @requires h ≠ null ∧ e ≠ null ∧ e⟨n*⟩null ∧ h⟨n*⟩x ∧ x⟨n+⟩null 
+#    @ensures h ≠ null ∧ h⟨n*⟩e ∧ e⟨n⟩x ∧ x⟨n*⟩null
+#  p = h;
+#  q = null;
+#  while (p != x && p !=null) do {
+#    q = p;
+#    p = p→n; }
+#  q→n = e;
+#  e→n = p 
+# }
+#
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h : V)
+(e : V)
+
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+
+(x : V)
+
+init     :=   h != null & (n*(h,x) | x = null) &
+              e != null & ~n*(h,e) & ntot_(e,null) &
+              x != h &
+              p = h & q = null
+
+program  := program([
+	while $p != x & p != null$ {$I$} ( q := p ; p := p.n ) ;
+	q.n := e ; e.n := p
+  ])
+
+Q        :=   true
+post     :=   wp_ae(epilogue, Q)
+bad      :=   ~ite(cond, wp_ae(loopBody,true), post)
+

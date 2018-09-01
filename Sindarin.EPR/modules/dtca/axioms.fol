@@ -1,0 +1,24 @@
+
+null : V
+
+#
+# \Gamma_{linOrd}
+# ---------------
+# properties that a (finite) relation r has to uphold so that there will
+# exist a function f such that r = f*.
+#
+reflexive(r) := forall u (r(u,u))
+transitive(r) := forall u v w (r(u,v) & r(v,w) -> r(u,w))
+lin(r) := forall u v w (r(u,v) & r(u,w) -> (r(v,w) | r(w,v)))
+antisymm(r) := forall u v (r(u,v) -> r(v,u) -> u=v)
+
+reflisolated(r, u) := forall v (r(u,v) | r(v,u) -> u=v)
+
+dtca(r) := reflexive(r) & transitive(r) & lin(r) & antisymm(r) & reflisolated(r,null)
+
+
+#
+# Dynamic memory allocation
+#
+dyna(n*, free) := ~free(null) &
+	forall u v (free(u) & (n*(u,v) | n*(v,u)) -> u=v)

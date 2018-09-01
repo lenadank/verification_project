@@ -1,0 +1,286 @@
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(g : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(R : V * V -> bool)
+
+(exit0 : bool) -> (exit : bool)
+
+# ghost variables
+(L : V * V -> bool)
+(H : V)
+
+dtca(L)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+# syntactic sugar
+(a < b)  := R(b,a)
+(a <= b) := ~R(b,a)
+
+init      :=  h != null & i = h & k = null &
+              j = g &
+              (forall z (~n*(h,z) | ~n*(g,z))) & 
+              sorted(ivlco(h,null,n*)) & sorted(ivlco(g,null,n*)) &
+              H = h & (forall u v (L(u,v) <-> n*(u,v))) &
+              ~exit
+
+cond      :=  ~exit
+loopBody  :=  program([
+       if $i != null$ then (
+          if $j = null | i <= j$ then (
+             k := i;
+             i := i.n
+          )
+          else (
+             if $k != null$ then (
+                k.n := j;
+                k := j;
+                j := j.n;
+                k.n := i
+             )
+             else (
+                h := j;
+                j := j.n;
+                h.n := i;
+                k := h
+             )
+          )
+       )
+       else ( k.n := j; exit := true )
+ ])
+
+post      :=  sorted(ivlco(h,null,n*)) &
+              forall z (z != null -> (n*(h,z) <-> (L(H,z) | L(g,z))))
+
+#bad       :=  ~ite(cond, wp_ae(loopBody,true), post)
+bad       :=  ~cond & ~post
+
+#
+# valid
+# * The inferred formula is an inductive invariant!
+# (86 clauses)
+# (62 universal clauses)
+# PDR: 37223.45s
+# N = 10
+# 476 iterations
+# 8869 calls to SAT
+#
+# #iterations = 476
+# #Z3 = 8869
+# inv = And(Not(And(k == i)),
+#     ForAll([x!V!7895, x!V!7893],
+#            Not(And(Not(n*(x!V!7895, x!V!7893)),
+#                    Not(R(j, x!V!7895)),
+#                    R(j, x!V!7893),
+#                    L(x!V!7893, k),
+#                    n*(H, x!V!7895),
+#                    L(H, x!V!7893)))),
+#     ForAll([x!V!7579, x!V!7581],
+#            Not(And(n*(H, x!V!7581),
+#                    Not(R(x!V!7581, x!V!7579)),
+#                    h != H,
+#                    L(x!V!7579, k),
+#                    Not(n*(h, j)),
+#                    Not(n*(x!V!7579, x!V!7581)),
+#                    L(x!V!7581, j),
+#                    L(H, x!V!7579),
+#                    Not(n*(j, k))))),
+#     ForAll([x!V!8191, x!V!8193],
+#            Not(And(Not(n*(j, x!V!8193)),
+#                    Not(n*(j, x!V!8191)),
+#                    L(g, x!V!8193),
+#                    Not(n*(H, j)),
+#                    n*(k, x!V!8191),
+#                    L(H, k),
+#                    Not(R(x!V!8193, k))))),
+#     ForAll([x!V!7063, x!V!7062, x!V!7064],
+#            Not(And(Not(n*(x!V!7063, x!V!7062)),
+#                    Not(n*(j, x!V!7064)),
+#                    Not(L(H, j)),
+#                    n*(k, x!V!7064),
+#                    Not(n*(g, x!V!7063)),
+#                    Not(R(g, j)),
+#                    L(g, x!V!7063),
+#                    L(g, x!V!7062),
+#                    Not(L(x!V!7062, x!V!7063))))),
+#     Not(And(L(k, j),
+#             Not(R(k, i)),
+#             Not(L(j, k)),
+#             Not(L(H, k)),
+#             H != h)),
+#     ForAll([x!V!7329, x!V!7328],
+#            Not(And(L(x!V!7329, x!V!7328),
+#                    Not(n*(g, j)),
+#                    L(g, x!V!7329),
+#                    Not(n*(j, k)),
+#                    Not(n*(g, x!V!7329)),
+#                    Not(n*(x!V!7329, x!V!7328))))),
+#     Not(And(R(j, k), null == i, i != j)),
+#     ForAll(x!V!4621,
+#            Not(And(Not(L(H, x!V!4621)),
+#                    L(h, x!V!4621),
+#                    L(x!V!4621, j),
+#                    Not(L(j, x!V!4621)),
+#                    Not(n*(x!V!4621, k))))),
+#     Not(And(H != h, Not(R(k, i)), null != j, R(j, k))),
+#     ForAll([x!V!3046, x!V!3050],
+#            Not(And(x!V!3046 != x!V!3050,
+#                    L(x!V!3046, x!V!3050),
+#                    n*(x!V!3050, x!V!3046),
+#                    H != h))),
+#     Not(And(null != j, Not(R(k, i)), i != h, R(j, k))),
+#     Not(And(Not(L(H, i)), i != j, R(h, H), R(j, H))),
+#     Not(And(H == null)),
+#     ForAll(x!V!8091,
+#            Not(And(L(H, x!V!8091),
+#                    Not(n*(H, j)),
+#                    i != x!V!8091,
+#                    L(x!V!8091, i),
+#                    R(g, x!V!8091),
+#                    Not(R(g, k)),
+#                    Not(n*(j, k))))),
+#     ForAll([x!V!2792, x!V!2796],
+#            Not(And(Not(L(x!V!2792, x!V!2796)),
+#                    L(H, x!V!2796),
+#                    R(x!V!2792, x!V!2796),
+#                    L(H, x!V!2792)))),
+#     ForAll(x!V!8186,
+#            Not(And(null == i,
+#                    Not(R(x!V!8186, k)),
+#                    Not(n*(j, k)),
+#                    L(g, x!V!8186),
+#                    Not(n*(j, x!V!8186))))),
+#     ForAll([x!V!6902, x!V!6907],
+#            Not(And(j == null,
+#                    Not(n*(x!V!6902, x!V!6907)),
+#                    R(x!V!6902, x!V!6907),
+#                    L(h, x!V!6902),
+#                    L(H, x!V!6907)))),
+#     ForAll([x!V!163, x!V!160],
+#            Not(And(L(g, x!V!163),
+#                    Not(L(x!V!163, x!V!160)),
+#                    L(g, x!V!160),
+#                    R(x!V!163, x!V!160)))),
+#     ForAll([x!V!6612, x!V!6610],
+#            Not(And(Not(L(g, x!V!6612)),
+#                    L(h, x!V!6610),
+#                    Not(n*(g, x!V!6610)),
+#                    R(g, x!V!6610),
+#                    L(x!V!6610, x!V!6612),
+#                    Not(n*(g, j))))),
+#     ForAll(x!V!547,
+#            Not(And(x!V!547 != k, L(k, x!V!547), exit))),
+#     Not(And(R(j, k), null != j, L(k, i))),
+#     ForAll(x!V!7519,
+#            Not(And(Not(R(x!V!7519, k)),
+#                    H != i,
+#                    Not(L(H, j)),
+#                    R(x!V!7519, H)))),
+#     ForAll([x!V!1531, x!V!1529],
+#            Not(And(Not(n*(x!V!1531, x!V!1529)),
+#                    k == null,
+#                    L(x!V!1531, x!V!1529)))),
+#     ForAll([x!V!2373, x!V!2374],
+#            Not(And(h != H,
+#                    Not(L(x!V!2374, h)),
+#                    L(x!V!2374, x!V!2373),
+#                    Not(n*(x!V!2374, x!V!2373)),
+#                    Not(L(h, x!V!2373))))),
+#     Not(And(Not(R(g, H)), H != h)),
+#     ForAll([x!V!7713, x!V!7714],
+#            Not(And(L(x!V!7713, i),
+#                    L(H, x!V!7713),
+#                    L(k, j),
+#                    Not(L(H, k)),
+#                    Not(L(j, k)),
+#                    L(h, x!V!7714),
+#                    L(x!V!7714, k),
+#                    R(x!V!7714, x!V!7713),
+#                    Not(n*(x!V!7714, x!V!7713))))),
+#     ForAll([x!V!7625, x!V!7627],
+#            Not(And(L(x!V!7625, j),
+#                    Not(R(x!V!7627, k)),
+#                    L(H, x!V!7627),
+#                    Not(n*(H, j)),
+#                    L(h, x!V!7625),
+#                    R(H, x!V!7627),
+#                    Not(n*(x!V!7625, x!V!7627)),
+#                    Not(n*(j, k)),
+#                    Not(R(H, x!V!7625)),
+#                    L(x!V!7627, k)))),
+#     ForAll(x!V!326,
+#            Not(And(h != H,
+#                    n*(h, x!V!326),
+#                    Not(L(h, x!V!326)),
+#                    Not(L(H, x!V!326))))),
+#     Not(And(h == g, Not(n*(k, i)), H == i)),
+#     Not(And(h == i, g != j)),
+#     ForAll([x!V!183, x!V!182],
+#            Not(And(n*(x!V!183, x!V!182),
+#                    g == null,
+#                    Not(L(x!V!183, x!V!182))))),
+#     ForAll([x!V!8207, x!V!8205],
+#            Not(And(i == null,
+#                    Not(n*(x!V!8205, x!V!8207)),
+#                    Not(n*(j, k)),
+#                    L(g, x!V!8207),
+#                    Not(n*(j, x!V!8207)),
+#                    L(H, x!V!8205),
+#                    Not(R(x!V!8207, x!V!8205)),
+#                    g != x!V!8207))),
+#     Not(And(null != j, Not(L(H, j)), Not(L(g, j)))),
+#     ForAll([x!V!8105, x!V!8103],
+#            Not(And(L(g, x!V!8103),
+#                    L(x!V!8105, k),
+#                    Not(n*(j, x!V!8103)),
+#                    Not(n*(H, j)),
+#                    Not(n*(j, k)),
+#                    R(x!V!8103, x!V!8105),
+#                    Not(n*(x!V!8103, x!V!8105)),
+#                    L(H, x!V!8105)))),
+#     ForAll([x!V!4531, x!V!4530],
+#            Not(And(Not(n*(x!V!4530, H)),
+#                    k == H,
+#                    null == i,
+#                    L(h, x!V!4530),
+#                    L(x!V!4530, x!V!4531),
+#                    Not(n*(x!V!4530, x!V!4531))))),
+#     ForAll(x!V!6234,
+#            Not(And(Not(exit),
+#                    n*(h, x!V!6234),
+#                    Not(n*(i, x!V!6234)),
+#                    Not(n*(x!V!6234, k))))),
+#     ForAll([x!V!8216, x!V!8217],
+#            Not(And(Not(n*(j, k)),
+#                    L(H, x!V!8217),
+#                    Not(n*(j, i)),
+#                    Not(n*(x!V!8217, x!V!8216)),
+#                    Not(n*(j, x!V!8216)),
+#                    Not(n*(H, j)),
+#                    Not(R(x!V!8216, x!V!8217)),
+#                    Not(n*(i, x!V!8217)),
+#                    g != x!V!8216,
+#                    L(g, x!V!8216)))),
+#     ForAll(x!V!7919,
+#            Not(And(Not(n*(x!V!7919, j)),
+#                    n*(x!V!7919, k),
+#                    Not(R(k, i)),
+#                    L(g, k),
+#                    Not(n*(j, k))))),
+# ...
+# N = 10
+# #univ_clauses = 62
+# time = 37223.450696
+# inv_fol = ¬(k = i) ∧ ∀x!V!7895 (∀x!V!7893 (¬(¬(n*(x!V!7895, x!V!7893)) ∧ ¬(R(j, x!V!7895)) ∧ R(j, x!V!7893) ∧ L(x!V!7893, k) ∧ n*(H, x!V!7895) ∧ L(H, x!V!7893)))) ∧ ∀x!V!7579 (∀x!V!7581 (¬(n*(H, x!V!7581) ∧ ¬(R(x!V!7581, x!V!7579)) ∧ h ≠ H ∧ L(x!V!7579, k) ∧ ¬(n*(h, j)) ∧ ¬(n*(x!V!7579, x!V!7581)) ∧ L(x!V!7581, j) ∧ L(H, x!V!7579) ∧ ¬(n*(j, k))))) ∧ ∀x!V!8191 (∀x!V!8193 (¬(¬(n*(j, x!V!8193)) ∧ ¬(n*(j, x!V!8191)) ∧ L(g, x!V!8193) ∧ ¬(n*(H, j)) ∧ n*(k, x!V!8191) ∧ L(H, k) ∧ ¬(R(x!V!8193, k))))) ∧ ∀x!V!7063 (∀x!V!7062 (∀x!V!7064 (¬(¬(n*(x!V!7063, x!V!7062)) ∧ ¬(n*(j, x!V!7064)) ∧ ¬(L(H, j)) ∧ n*(k, x!V!7064) ∧ ¬(n*(g, x!V!7063)) ∧ ¬(R(g, j)) ∧ L(g, x!V!7063) ∧ L(g, x!V!7062) ∧ ¬(L(x!V!7062, x!V!7063)))))) ∧ ¬(L(k, j) ∧ ¬(R(k, i)) ∧ ¬(L(j, k)) ∧ ¬(L(H, k)) ∧ H ≠ h) ∧ ∀x!V!7329 (∀x!V!7328 (¬(L(x!V!7329, x!V!7328) ∧ ¬(n*(g, j)) ∧ L(g, x!V!7329) ∧ ¬(n*(j, k)) ∧ ¬(n*(g, x!V!7329)) ∧ ¬(n*(x!V!7329, x!V!7328))))) ∧ ¬(R(j, k) ∧ null = i ∧ i ≠ j) ∧ ∀x!V!4621 (¬(¬(L(H, x!V!4621)) ∧ L(h, x!V!4621) ∧ L(x!V!4621, j) ∧ ¬(L(j, x!V!4621)) ∧ ¬(n*(x!V!4621, k)))) ∧ ¬(H ≠ h ∧ ¬(R(k, i)) ∧ null ≠ j ∧ R(j, k)) ∧ ∀x!V!3046 (∀x!V!3050 (¬(x!V!3046 ≠ x!V!3050 ∧ L(x!V!3046, x!V!3050) ∧ n*(x!V!3050, x!V!3046) ∧ H ≠ h))) ∧ ¬(null ≠ j ∧ ¬(R(k, i)) ∧ i ≠ h ∧ R(j, k)) ∧ ¬(¬(L(H, i)) ∧ i ≠ j ∧ R(h, H) ∧ R(j, H)) ∧ ¬(H = null) ∧ ∀x!V!8091 (¬(L(H, x!V!8091) ∧ ¬(n*(H, j)) ∧ i ≠ x!V!8091 ∧ L(x!V!8091, i) ∧ R(g, x!V!8091) ∧ ¬(R(g, k)) ∧ ¬(n*(j, k)))) ∧ ∀x!V!2792 (∀x!V!2796 (¬(¬(L(x!V!2792, x!V!2796)) ∧ L(H, x!V!2796) ∧ R(x!V!2792, x!V!2796) ∧ L(H, x!V!2792)))) ∧ ∀x!V!8186 (¬(null = i ∧ ¬(R(x!V!8186, k)) ∧ ¬(n*(j, k)) ∧ L(g, x!V!8186) ∧ ¬(n*(j, x!V!8186)))) ∧ ∀x!V!6902 (∀x!V!6907 (¬(j = null ∧ ¬(n*(x!V!6902, x!V!6907)) ∧ R(x!V!6902, x!V!6907) ∧ L(h, x!V!6902) ∧ L(H, x!V!6907)))) ∧ ∀x!V!163 (∀x!V!160 (¬(L(g, x!V!163) ∧ ¬(L(x!V!163, x!V!160)) ∧ L(g, x!V!160) ∧ R(x!V!163, x!V!160)))) ∧ ∀x!V!6612 (∀x!V!6610 (¬(¬(L(g, x!V!6612)) ∧ L(h, x!V!6610) ∧ ¬(n*(g, x!V!6610)) ∧ R(g, x!V!6610) ∧ L(x!V!6610, x!V!6612) ∧ ¬(n*(g, j))))) ∧ ∀x!V!547 (¬(x!V!547 ≠ k ∧ L(k, x!V!547) ∧ exit)) ∧ ¬(R(j, k) ∧ null ≠ j ∧ L(k, i)) ∧ ∀x!V!7519 (¬(¬(R(x!V!7519, k)) ∧ H ≠ i ∧ ¬(L(H, j)) ∧ R(x!V!7519, H))) ∧ ∀x!V!1531 (∀x!V!1529 (¬(¬(n*(x!V!1531, x!V!1529)) ∧ k = null ∧ L(x!V!1531, x!V!1529)))) ∧ ∀x!V!2373 (∀x!V!2374 (¬(h ≠ H ∧ ¬(L(x!V!2374, h)) ∧ L(x!V!2374, x!V!2373) ∧ ¬(n*(x!V!2374, x!V!2373)) ∧ ¬(L(h, x!V!2373))))) ∧ ¬(¬(R(g, H)) ∧ H ≠ h) ∧ ∀x!V!7713 (∀x!V!7714 (¬(L(x!V!7713, i) ∧ L(H, x!V!7713) ∧ L(k, j) ∧ ¬(L(H, k)) ∧ ¬(L(j, k)) ∧ L(h, x!V!7714) ∧ L(x!V!7714, k) ∧ R(x!V!7714, x!V!7713) ∧ ¬(n*(x!V!7714, x!V!7713))))) ∧ ∀x!V!7625 (∀x!V!7627 (¬(L(x!V!7625, j) ∧ ¬(R(x!V!7627, k)) ∧ L(H, x!V!7627) ∧ ¬(n*(H, j)) ∧ L(h, x!V!7625) ∧ R(H, x!V!7627) ∧ ¬(n*(x!V!7625, x!V!7627)) ∧ ¬(n*(j, k)) ∧ ¬(R(H, x!V!7625)) ∧ L(x!V!7627, k)))) ∧ ∀x!V!326 (¬(h ≠ H ∧ n*(h, x!V!326) ∧ ¬(L(h, x!V!326)) ∧ ¬(L(H, x!V!326)))) ∧ ¬(h = g ∧ ¬(n*(k, i)) ∧ H = i) ∧ ¬(h = i ∧ g ≠ j) ∧ ∀x!V!183 (∀x!V!182 (¬(n*(x!V!183, x!V!182) ∧ g = null ∧ ¬(L(x!V!183, x!V!182))))) ∧ ∀x!V!8207 (∀x!V!8205 (¬(i = null ∧ ¬(n*(x!V!8205, x!V!8207)) ∧ ¬(n*(j, k)) ∧ L(g, x!V!8207) ∧ ¬(n*(j, x!V!8207)) ∧ L(H, x!V!8205) ∧ ¬(R(x!V!8207, x!V!8205)) ∧ g ≠ x!V!8207))) ∧ ¬(null ≠ j ∧ ¬(L(H, j)) ∧ ¬(L(g, j))) ∧ ∀x!V!8105 (∀x!V!8103 (¬(L(g, x!V!8103) ∧ L(x!V!8105, k) ∧ ¬(n*(j, x!V!8103)) ∧ ¬(n*(H, j)) ∧ ¬(n*(j, k)) ∧ R(x!V!8103, x!V!8105) ∧ ¬(n*(x!V!8103, x!V!8105)) ∧ L(H, x!V!8105)))) ∧ ∀x!V!4531 (∀x!V!4530 (¬(¬(n*(x!V!4530, H)) ∧ k = H ∧ null = i ∧ L(h, x!V!4530) ∧ L(x!V!4530, x!V!4531) ∧ ¬(n*(x!V!4530, x!V!4531))))) ∧ ∀x!V!6234 (¬(¬(exit) ∧ n*(h, x!V!6234) ∧ ¬(n*(i, x!V!6234)) ∧ ¬(n*(x!V!6234, k)))) ∧ ∀x!V!8216 (∀x!V!8217 (¬(¬(n*(j, k)) ∧ L(H, x!V!8217) ∧ ¬(n*(j, i)) ∧ ¬(n*(x!V!8217, x!V!8216)) ∧ ¬(n*(j, x!V!8216)) ∧ ¬(n*(H, j)) ∧ ¬(R(x!V!8216, x!V!8217)) ∧ ¬(n*(i, x!V!8217)) ∧ g ≠ x!V!8216 ∧ L(g, x!V!8216)))) ∧ ∀x!V!7919 (¬(¬(n*(x!V!7919, j)) ∧ n*(x!V!7919, k) ∧ ¬(R(k, i)) ∧ L(g, k) ∧ ¬(n*(j, k)))) ∧ ∀x!V!8225 (∀x!V!8222 (¬(exit ∧ L(g, x!V!8225) ∧ L(x!V!8225, x!V!8222) ∧ ¬(n*(x!V!8225, x!V!8222))))) ∧ ¬(h ≠ H ∧ h ≠ g) ∧ ∀x!V!8133 (∀x!V!8135 (¬(¬(n*(x!V!8133, j)) ∧ ¬(n*(j, x!V!8135)) ∧ L(k, x!V!8135) ∧ x!V!8135 ≠ k ∧ n*(x!V!8133, k) ∧ ¬(n*(j, k)) ∧ L(k, j)))) ∧ ∀x!V!7393 (∀x!V!7391 (¬(n*(H, x!V!7393) ∧ ¬(R(H, x!V!7391)) ∧ ¬(n*(x!V!7393, j)) ∧ ¬(L(x!V!7393, x!V!7391)) ∧ ¬(L(x!V!7393, g)) ∧ ¬(R(g, H)) ∧ L(H, x!V!7391) ∧ ¬(n*(j, x!V!7391)) ∧ ¬(n*(x!V!7391, x!V!7393))))) ∧ ∀x!V!2622 (¬(H = k ∧ ¬(n*(j, x!V!2622)) ∧ L(j, x!V!2622))) ∧ ∀x!V!1882 (¬(n*(x!V!1882, h) ∧ ¬(n*(x!V!1882, k)) ∧ ¬(L(x!V!1882, h)))) ∧ ¬(i ≠ H ∧ ¬(n*(H, k))) ∧ ¬(i ≠ h ∧ i ≠ null ∧ ¬(n*(k, i))) ∧ ∀x!V!8008 (∀x!V!8009 (¬(n*(H, x!V!8009) ∧ ¬(n*(j, x!V!8009)) ∧ L(H, x!V!8008) ∧ ¬(R(k, i)) ∧ R(x!V!8009, x!V!8008) ∧ ¬(n*(x!V!8009, x!V!8008)) ∧ ¬(n*(j, k)) ∧ ¬(n*(H, j))))) ∧ ¬(¬(n*(h, H))) ∧ ∀x!V!1226 (¬(¬(n*(k, i)) ∧ n*(k, x!V!1226) ∧ ¬(exit) ∧ k ≠ x!V!1226)) ∧ ∀x!V!112 (¬(¬(n*(H, x!V!112)) ∧ L(H, x!V!112))) ∧ ∀x!V!4743 (¬(¬(n*(x!V!4743, j)) ∧ L(x!V!4743, j) ∧ ¬(n*(h, x!V!4743)) ∧ ¬(L(H, j)) ∧ L(h, x!V!4743))) ∧ ∀x!V!4668 (¬(L(j, x!V!4668) ∧ ¬(n*(j, x!V!4668)) ∧ H ≠ h)) ∧ ∀x!V!7455 (∀x!V!7454 (¬(L(g, x!V!7454) ∧ ¬(n*(j, k)) ∧ ¬(n*(x!V!7454, j)) ∧ L(H, x!V!7455) ∧ n*(x!V!7454, x!V!7455) ∧ ¬(R(g, x!V!7455)) ∧ ¬(n*(k, x!V!7455)) ∧ ¬(L(x!V!7454, g))))) ∧ ¬(g ≠ j ∧ R(g, h)) ∧ ∀x!V!630 (∀x!V!625 (¬(exit ∧ ¬(L(x!V!630, x!V!625)) ∧ h = k ∧ n*(x!V!630, x!V!625) ∧ ¬(L(x!V!630, k))))) ∧ ¬(¬(n*(h, g)) ∧ j ≠ g ∧ ¬(R(g, h))) ∧ ∀x!V!3250 (¬(n*(j, x!V!3250) ∧ ¬(L(g, x!V!3250)) ∧ ¬(L(j, x!V!3250)) ∧ ¬(L(H, x!V!3250)))) ∧ ∀x!V!7684 (¬(R(x!V!7684, H) ∧ ¬(L(k, x!V!7684)) ∧ ¬(n*(x!V!7684, H)) ∧ ¬(L(H, k)) ∧ L(h, x!V!7684) ∧ L(h, j))) ∧ ∀x!V!4693 (¬(H ≠ h ∧ ¬(n*(h, j)) ∧ ¬(n*(H, x!V!4693)) ∧ L(h, x!V!4693) ∧ ¬(L(j, x!V!4693)) ∧ ¬(n*(x!V!4693, H)))) ∧ ∀x!V!4317 (¬(L(g, k) ∧ L(k, x!V!4317) ∧ x!V!4317 ≠ k ∧ j = null)) ∧ ∀x!V!8112 (∀x!V!8115 (¬(¬(n*(h, j)) ∧ ¬(n*(j, x!V!8115)) ∧ ¬(n*(j, i)) ∧ L(h, x!V!8112) ∧ L(x!V!8112, i) ∧ R(x!V!8115, x!V!8112) ∧ L(g, x!V!8115) ∧ ¬(n*(x!V!8115, x!V!8112))))) ∧ ∀x!V!7408 (∀x!V!7411 (¬(exit ∧ ¬(n*(x!V!7411, x!V!7408)) ∧ L(H, x!V!7408) ∧ R(x!V!7411, x!V!7408) ∧ n*(H, x!V!7411)))) ∧ ∀x!V!7696 (∀x!V!7694 (¬(¬(n*(j, k)) ∧ L(g, x!V!7694) ∧ R(x!V!7694, x!V!7696) ∧ ¬(n*(x!V!7694, j)) ∧ L(g, j) ∧ L(x!V!7696, k) ∧ L(H, x!V!7696) ∧ ¬(n*(x!V!7694, x!V!7696)) ∧ R(g, H)))) ∧ ∀x!V!7274 (¬(¬(R(x!V!7274, k)) ∧ ¬(L(j, x!V!7274)) ∧ exit ∧ L(g, x!V!7274))) ∧ ∀x!V!3664 (∀x!V!3661 (¬(exit ∧ j = g ∧ ¬(n*(x!V!3661, g)) ∧ n*(x!V!3661, x!V!3664) ∧ ¬(L(x!V!3661, x!V!3664))))) ∧ ¬(exit ∧ L(j, k)) ∧ ¬(¬(n*(g, i)) ∧ k = g ∧ g ≠ j) ∧ ∀x!V!1237 (∀x!V!1235 (¬(¬(R(g, H)) ∧ ¬(exit) ∧ ¬(L(x!V!1237, x!V!1235)) ∧ n*(x!V!1237, x!V!1235) ∧ j = g ∧ ¬(L(H, g))))) ∧ ∀x!V!1141 (¬(¬(L(H, j)) ∧ g = j ∧ ¬(L(H, x!V!1141)) ∧ n*(H, x!V!1141) ∧ ¬(exit))) ∧ ∀x!V!4536 (∀x!V!4535 (¬(H ≠ h ∧ L(x!V!4536, x!V!4535) ∧ L(h, x!V!4536) ∧ ¬(n*(x!V!4536, H)) ∧ i = H ∧ ¬(n*(x!V!4536, x!V!4535))))) ∧ ∀x!V!1394 (∀x!V!1393 (∀x!V!1397 (¬(j = g ∧ ¬(L(x!V!1394, x!V!1397)) ∧ n*(x!V!1394, x!V!1397) ∧ n*(x!V!1393, g) ∧ exit ∧ ¬(n*(x!V!1393, x!V!1397)))))) ∧ ∀x!V!4829 (¬(R(x!V!4829, H) ∧ ¬(n*(x!V!4829, H)) ∧ L(h, x!V!4829) ∧ ¬(L(H, j)) ∧ ¬(L(j, x!V!4829)))) ∧ ¬(¬(L(H, k)) ∧ k ≠ null ∧ ¬(L(g, k))) ∧ ∀x!V!8229 (∀x!V!8227 (¬(i = null ∧ ¬(n*(x!V!8227, x!V!8229)) ∧ L(x!V!8227, x!V!8229) ∧ ¬(n*(j, x!V!8229)) ∧ n*(h, x!V!8227) ∧ ¬(n*(j, k))))) ∧ ∀x!V!5794 (¬(g = j ∧ L(j, x!V!5794) ∧ ¬(n*(j, x!V!5794)))) ∧ ∀x!V!8239 (∀x!V!8238 (¬(¬(L(x!V!8238, x!V!8239)) ∧ ¬(n*(j, x!V!8238)) ∧ n*(k, i) ∧ L(g, x!V!8238) ∧ ¬(n*(k, x!V!8239)) ∧ ¬(n*(x!V!8239, x!V!8238)) ∧ ¬(n*(h, j)) ∧ ¬(n*(j, i)) ∧ L(g, x!V!8239)))) ∧ ∀x!V!2218 (¬(¬(L(g, x!V!2218)) ∧ ¬(L(H, x!V!2218)) ∧ n*(H, x!V!2218))) ∧ ∀x!V!6404 (∀x!V!6405 (¬(¬(L(x!V!6404, x!V!6405)) ∧ L(H, x!V!6405) ∧ H ≠ x!V!6405 ∧ j ≠ g ∧ R(x!V!6405, g) ∧ n*(x!V!6404, x!V!6405)))) ∧ ¬(¬(n*(g, k)) ∧ j ≠ g) ∧ ¬(exit ∧ i ≠ null) ∧ ∀x!V!4595 (¬(j ≠ x!V!4595 ∧ L(k, x!V!4595) ∧ H ≠ h ∧ ¬(L(H, k)) ∧ x!V!4595 ≠ k ∧ L(x!V!4595, j))) ∧ ∀x!V!4718 (¬(¬(n*(H, x!V!4718)) ∧ L(x!V!4718, j) ∧ ¬(R(x!V!4718, H)) ∧ ¬(n*(x!V!4718, j)) ∧ L(h, x!V!4718) ∧ ¬(L(H, j)))) ∧ ∀x!V!6315 (¬(j ≠ null ∧ ¬(n*(k, x!V!6315)) ∧ ¬(R(x!V!6315, k)) ∧ exit ∧ L(g, x!V!6315))) ∧ ∀x!V!6447 (∀x!V!6448 (¬(L(h, x!V!6447) ∧ ¬(n*(j, x!V!6448)) ∧ n*(x!V!6447, x!V!6448) ∧ ¬(n*(g, j)) ∧ L(h, x!V!6448) ∧ ¬(L(x!V!6447, x!V!6448))))) ∧ ¬(j ≠ g ∧ n*(k, g) ∧ ¬(R(k, i)))
+# #clauses = 86

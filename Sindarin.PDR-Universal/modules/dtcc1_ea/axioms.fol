@@ -1,0 +1,16 @@
+
+on_cycle(k*,ms,mt,u) := ms != null & k*(u,ms) & k*(mt,u)
+on_cycle(u) := on_cycle(k*,ms,mt,u)
+
+ktot_(u,v) := ntot_(k*,u,v)
+k0tot_(u,v) := ntot_(k*0,u,v)
+_ktot_(u,v) := ntot_(_k*,u,v)
+
+
+n*(k*,ms,mt,u,v) := k*(u,v) | (ms != null & k*(u,ms) & k*(mt,v))
+n*(u,v) := n*(k*,ms,mt,u,v)
+
+cntot_(u,v) := ite(u = ms, v = mt, ktot_(u,v))
+
+
+dtcc1(k*,ms,mt) := ms != null -> ntot_(k*,ms,null) & k*(mt,ms)

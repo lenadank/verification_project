@@ -1,0 +1,51 @@
+#
+# void delete(List h, List x) {
+#    @requires h ≠ null ∧ h⟨n*⟩x ∧ x⟨n+⟩null ∧ h⟨n*⟩y ∧ y ≠ x
+#    @ensures ~h⟨n*⟩x ∧ h⟨n*⟩null ∧ h⟨n*⟩y
+#  p=h;
+#  q=null;
+#  while (p != x && p !=null) do {
+#    q = p;
+#    p = p→n; 
+#  }
+#  t = p→n;
+#  if (q != null) then
+#    q→n = t
+#  else
+#    h = t
+# }
+#
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+
+(exit0 : bool) -> (exit : bool)
+
+(x : V)
+
+
+init     :=  h != null & n*(h,x) &
+             p = h & q = null &
+             ~exit
+
+cond     :=  ~exit
+loopBody :=  program([
+                if $p != x & p != null$ then
+                   ( q := p; p := p.n )
+                else (
+                   t := p.n;
+                   if $q != null$ then
+                      q.n := t
+                   else
+                      h := t;
+                   exit := true
+                )
+             ])
+
+post     :=  true
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

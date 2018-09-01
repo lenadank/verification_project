@@ -1,0 +1,59 @@
+# @uses dtca
+# @uses hoare
+# @uses base
+
+#
+# The recursive version of 'filter' goes like that:
+#
+# filter(h) :=
+# 	t := filter(h.n)
+#	if C(h):
+#		h.n := t
+#	else:
+#		h.n := null
+#		h := t
+#	return h
+#
+#
+# In this simplified version I only prove that   h<n*> == _h<_n*> `intersect` C.
+# The "frame" is not needed here.
+#
+
+# That's the spec
+[filter-Q](h, _h, _n*, n*) := dtca(n*) & forall z (n*(h,z) <-> _n*(_h,z) & C(z))
+
+
+# Constructing the WP
+[if ... return h] := [;](
+	if(C(h), [;]([x.n:=null](h, n), [x.n:=y](h, n, t)),
+			 [;]([x.n:=null](h, n), [x:=y](h, t))),
+	return(h))
+
+[filter-prog] := [;](
+         [x:=y.n](eta,h,n),
+	[;]( [x:=filter(h)](t, eta),
+		 [if ... return h] )
+ ) 	    
+ 
+wp([x:=filter(h)](x,h), Q) := [wp filter](x, h, Q)
+
+# (IH)
+[wp filter](h, _h, Q) := 
+	forall u ([filter-Q](u, _h, n*, n*_) -> 
+			dr(h := u, dr(n* := n*_, Q)) )
+	
+h : V
+_h : V
+t : V
+eta : V
+C : V -> bool
+n* : V * V -> bool
+n*_ : V * V -> bool
+_n* : V * V -> bool
+
+dtca(n*)
+
+P := _h = h & eqrel(_n*, n*) & exists z (n+_(h,z))
+Q := [filter-Q](h, _h, _n*, n*)
+
+verify(P, [filter-prog], Q)

@@ -1,0 +1,54 @@
+
+wp_ea(`skip, Q) := Q
+wp_ea([x:=y](x, y), Q) := dr(x := y, Q)
+wp_ea([x:=null](x), Q) := dr(x := null, Q)
+wp_ea([x.n|=y](x, `n, y), Q) := x!=null & ~n*(y,x) & dr(n*(u,v) := n*(u,v) | (y!=null & n*(u,x) & n*(y,v)), Q)
+wp_ea([x.n:=null](x, `n), Q) := x!=null & dr(n*(u,v) := n*(u,v) & (~n*(u,x) | n*(v,x)), Q)
+wp_ea([x:=y.n](x, y, `n), Q) := y != null &
+   exists z (ntot_(y,z) & dr(x := z, Q))
+wp_ea([;](s1, s2), Q) := wp_ea(s1, wp_ea(s2, Q))
+wp_ea(if(C, s1, s2), Q) := ite(C, wp_ea(s1, Q), wp_ea(s2, Q))
+wp_ea(assume(K), Q) := K -> Q
+wp_ea(return(x), Q) := dr(retval:=x, Q)
+wp_ea([x:=new](x), Q) :=
+   (forall z (z = null | alloc(z)) & dr(x := null, Q)) |
+   exists z ((z != null & ~alloc(z)) & dr(x := z, alloc(u) := alloc(u) | u=z, Q))
+wp_ea([r:=f(...)](_, free(x)), Q) := x != null & alloc(x) & dr(alloc(u) := alloc(u) & u!=x, Q)
+# THIS IS CHEATING!!
+# (it will not work in general)
+# (seems like same cheating is in effect for [x:=new])
+wp_ea([r:=f(...)](flag, havoc(_)), Q) := dr(flag := true, Q) | dr(flag := false, Q)
+wp_ea([r:=f(...)](flag, cas(x,y,z)), Q) := ite(x = y, dr(flag := true, x := z, Q), dr(flag := false, Q))
+
+# Same for field p @@@
+wp_ea([x.n|=y](x, `p, y), Q) := x!=null & ~p*(y,x) & dr(p*(u,v) := p*(u,v) | (y!=null & p*(u,x) & p*(y,v)), Q)
+wp_ea([x.n:=null](x, `p), Q) := x!=null & dr(p*(u,v) := p*(u,v) & (~p*(u,x) | p*(v,x)), Q)
+wp_ea([x:=y.n](x, y, `p), Q) := y != null &
+   exists z (ptot_(y,z) & dr(x := z, Q))
+   
+
+wp_ae(`skip, Q) := Q
+wp_ae([x:=y](x, y), Q) := dr(x := y, Q)
+wp_ae([x:=null](x), Q) := dr(x := null, Q)
+wp_ae([x.n|=y](x, `n, y), Q) := x!=null & ~n*(y,x) & dr(n*(u,v) := n*(u,v) | (y!=null & n*(u,x) & n*(y,v)), Q)
+wp_ae([x.n:=null](x, `n), Q) := x!=null & dr(n*(u,v) := n*(u,v) & (~n*(u,x) | n*(v,x)), Q)
+wp_ae([x:=y.n](x, y, `n), Q) := y != null &
+   forall z (ntot_(y,z) -> dr(x := z, Q))
+wp_ae([;](s1, s2), Q) := wp_ae(s1, wp_ae(s2, Q))
+wp_ae(if(C, s1, s2), Q) := ite(C, wp_ae(s1, Q), wp_ae(s2, Q))
+wp_ae(assume(K), Q) := K -> Q
+wp_ae(return(x), Q) := dr(retval:=x, Q)
+wp_ae([x:=new](x), Q) :=
+   (forall z (z = null | alloc(z)) -> dr(x := null, Q)) &
+   forall z ((z != null & ~alloc(z)) -> dr(x := z, alloc(u) := alloc(u) | u=z, Q))
+wp_ae([r:=f(...)](_, free(x)), Q) := x != null & alloc(x) & dr(alloc(u) := alloc(u) & u!=x, Q)
+wp_ae([r:=f(...)](flag, havoc(_)), Q) := dr(flag := true, Q) & dr(flag := false, Q)
+wp_ae([r:=f(...)](flag, cas(x,y,z)), Q) := ite(x = y, dr(flag := true, x := z, Q), dr(flag := false, Q))
+
+# Same for field p @@@
+wp_ae([x.n|=y](x, `p, y), Q) := x!=null & ~p*(y,x) & dr(p*(u,v) := p*(u,v) | (y!=null & p*(u,x) & p*(y,v)), Q)
+wp_ae([x.n:=null](x, `p), Q) := x!=null & dr(p*(u,v) := p*(u,v) & (~p*(u,x) | p*(v,x)), Q)
+wp_ae([x:=y.n](x, y, `p), Q) := y != null &
+   forall z (ptot_(y,z) -> dr(x := z, Q))
+
+ite(c,t,e) := (c -> t) & (~c -> e)

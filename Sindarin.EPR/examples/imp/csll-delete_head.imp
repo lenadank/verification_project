@@ -1,0 +1,36 @@
+# @uses dtca_cycles
+
+h : V
+h_ : V
+i : V
+j : V
+_between : V * V * V -> bool
+
+delete_head := program([
+    i := h ; j := null ;
+    while $i != h | j = null$ {$I$} (
+       j := i ;
+       i := i.n
+    ) ;
+	if $i = j$ then
+	  h := null
+	else (
+	  h := h.n ;
+  	  j.n := h
+    )
+ ])
+
+P := h_ = h & 
+	  on_cycle(h) &
+ 	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := h_ = h & on_cycle(h) & n*(h,i) &
+      ite(j = null, i = h, n*(h,j) & ntot_(j,i)) &
+ 	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+Q := ite(h = null, forall u (_between(h_,u,u) <-> h_ = u),
+     forall u v ((_between(h_,u,v) & h_ != u & h_ != v) -> between(h,u,v)) &
+     forall u v ((between(h,u,v) & h != v) -> _between(h_,u,v)) &
+	 on_cycle(h) & ~n*(h,h_))
+	 
+lemma(P -> wp(delete_head,Q))

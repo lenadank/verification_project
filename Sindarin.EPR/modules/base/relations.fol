@@ -1,0 +1,19 @@
+
+eqpred(S1,S2) := forall u (S1(u) <-> S2(u))
+subpred(S1,S2) := forall u (S1(u) -> S2(u))
+
+eqrel(R1,R2) := forall u v (R1(u,v) <-> R2(u,v))
+subrel(R1,R2) := forall u v (R1(u,v) -> R2(u,v))
+
+# Stuff about orders
+partial_order(r) := reflexive(r) & transitive(r) & antisymm(r)
+total_order(r) := partial_order(r) & forall u v (r(u,v) | r(v,u))
+
+
+# size macros
+size2 := provided(z1 : V) & provided(z2 : V) & provided(forall t (t=z1 | t=z2))
+size3 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(forall t (t=z1 | t=z2 | t=z3))
+size4 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(z4 : V) & provided(forall t (t=z1 | t=z2 | t=z3| t=z4))
+size5 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(z4 : V) & provided(z5 : V) & provided(forall t (t=z1 | t=z2 | t=z3| t=z4| t=z5))
+size6 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(z4 : V) & provided(z5 : V) & provided(z6 : V) & provided(forall t (t=z1 | t=z2 | t=z3| t=z4| t=z5| t=z6))
+

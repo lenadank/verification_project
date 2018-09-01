@@ -1,0 +1,23 @@
+
+(h : V)
+(n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+dtca(p*) & dtca(p*0)
+
+init        :=  i = h & j = null &
+                forall u v (p*(u,v) -> u = v)
+
+cond        :=  i != null
+loopBody    :=  program([
+                   i.p := j;
+                   j := i;
+                   i := i.n
+                ])
+
+post        :=  forall u v (n*(h,u) & n*(h,v) -> (p*(v,u) <-> n*(u,v)))
+bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
+

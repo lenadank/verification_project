@@ -1,0 +1,38 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+j : V
+t : V
+
+_n* : V * V -> bool
+_h : V
+
+
+prog := program([
+    i := h ; j := null ;
+    while $i != null$ {$I$} (
+      j := i ; i := i.n
+    ) ;
+    assert $ntot_(j,null) & n*(h,j)$ ;
+    if $h != j$ then ( 
+       j.n := h ;
+       assert $on_cycle(h)$ ;
+       t := h.n ;
+       h.n := null ;
+       h := t
+    )
+    else skip
+ ])
+
+ 
+ 
+P := h != null & ~on_cycle(h) &
+     forall u v (_n*(u,v) <-> n*(u,v)) & _h = h
+Q := forall u (_n*(_h,u) <-> n*(h,u)) & ntot_(_h,null) &
+     forall u v (u != _h & v != _h & _n*(_h,u) & _n*(_h,v) ->
+                 (_n*(u,v) <-> n*(u,v)))
+
+I := P & ite(j = null, i = h, n*(h,j) & ntot_(j,i))
+
+lemma(P -> wp(prog, Q))

@@ -1,0 +1,67 @@
+# @flags --no-preds-dll
+
+#
+#  h
+#   \    p     p     p
+#    [ ]-->[ ]-->[ ]-->[ ]
+#   n |  p
+#    [ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#
+
+# flatten(h)
+#	i := h;
+#	j := null;
+#	while $i != null$ {$I1$} (
+#		k := i;
+#		while $k != null$ {$I2$} (
+#			j := k;
+#			k := k.p
+#		) ;
+#		i := i.n; j.p := null; j.p := i
+#	)
+ 
+h : V
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+#(n0* : V * V -> bool) -> (n* : V * V -> bool)
+n* : V * V -> bool
+(p0* : V * V -> bool) -> (p* : V * V -> bool)
+
+# program counter mockup
+(loc10 : bool) -> (loc1 : bool)
+(loc20 : bool) -> (loc2 : bool)
+(loc30 : bool) -> (loc3 : bool)
+
+dtca(p*)
+dtca(p0*)
+
+loc1 -> ~(loc2 | loc3)
+loc2 -> ~(loc1 | loc3)
+loc3 -> ~(loc1 | loc2)
+
+init := loc1 & ~loc2 & ~loc3 & i = h & j = null &
+        forall z u y (n*(h,z) & p*(z,u) & n*(h,y) & p*(y,u) -> z = y)
+
+cond := loc1 -> i != null
+loopBody := program([
+  if $loc1$ then (
+    k := i ; loc1 := false ; loc2 := true
+  ) else
+  (if $loc2$ then (
+    if $k != null$ then ( j := k ; k := k.p )
+    else ( loc2 := false ; loc3 := true )
+   ) else
+   if $loc3$ then (
+     i := i.n ; j.p := i ; loc3 := false ; loc1 := true
+   ) else skip
+  )])
+
+post := true
+bad := ~ite(cond, wp_ae(loopBody,true), post)
+

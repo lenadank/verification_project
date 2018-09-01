@@ -1,0 +1,62 @@
+
+null : V
+
+#
+# \Gamma_{linOrd}
+# ---------------
+# properties that a (finite) relation r has to uphold so that there will
+# exist a function f such that r = f*.
+#
+reflexive(r) := forall u (r(u,u))
+transitive(r) := forall u v w (r(u,v) & r(v,w) -> r(u,w))
+lin(r) := forall u v w (r(u,v) & r(u,w) -> (r(v,w) | r(w,v)))
+antisymm(r) := forall u v (r(u,v) -> r(v,u) -> u=v)
+
+reflisolated(r, u) := forall v ((r(u,v) | r(v,u)) -> u=v)
+
+dtca(r) := reflexive(r) & transitive(r) & lin(r) & antisymm(r) & reflisolated(r,null)
+
+d* : V * V -> bool
+dtca(d*)
+
+r* : V * V -> bool
+dtca(r*)
+forall u v w (r*(v,u) & r*(w,u) -> (r*(v,w) | r*(w,v)))
+
+l0 : V -> V
+forall u (r*(l0(u),u))
+forall u v (r*(u,v) -> r*(l0(v),u))
+
+forall u v w (r*(u,v) & d*(w,v) -> ((u = v) | (w = v)))
+forall u v (d*(u,v) & u != v -> l0(u) = u)
+
+
+
+
+
+
+#
+# User-friendly macros
+#
+
+f+_(f*,u,v) := f*(u,v) & u != v
+f_(f*,u,v) := f+_(f*,u,v) & forall w (f+_(f*,u,w) -> f*(v,w))
+ftot_(f*,u,v) := f_(f*,u,v) | (v = null & forall w (~f+_(f*,u,w)))
+
+d+_(u,v) := f+_(d*,u,v)
+d_(u,v) := f_(d*,u,v)
+dtot_(u,v) := ftot_(d*,u,v)
+
+r+_(u,v) := f+_(r*,u,v)
+r_(u,v) := f_(r*,u,v)
+rtot_(u,v) := ftot_(r*,u,v)
+
+[d*r*](u,v) := d*(u,l0(v))
+flat_order(u,v) := ite(l0(u)=l0(v),r*(u,v),d*(l0(u),l0(v)))
+flat_between(u,v,w) := flat_order(u,v) & flat_order(v,w)
+
+size2 := provided(z1 : V) & provided(z2 : V) & provided(forall t (t=z1 | t=z2))
+size3 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(forall t (t=z1 | t=z2 | t=z3))
+size4 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(z4 : V) & provided(forall t (t=z1 | t=z2 | t=z3| t=z4))
+size5 := provided(z1 : V) & provided(z2 : V) & provided(z3 : V) & provided(z4 : V) & provided(z5 : V) & provided(forall t (t=z1 | t=z2 | t=z3| t=z4| t=z5))
+

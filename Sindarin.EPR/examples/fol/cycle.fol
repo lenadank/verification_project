@@ -1,0 +1,15 @@
+# @uses dtca_cycles
+
+
+#lemma(forall u v (n*(u,v) & k*(km0(v),u) -> between(u, v, u)))
+
+#lemma(forall u v (k*(u,v) & k*(km0(v),u) -> between(u, v, u)))
+#lemma(forall u v (k*(km0(u),v) & k*(km0(v),u) -> between(u, v, u)))
+
+
+#lemma(forall u v w (u != v & v != w & u != w & between(u, v, w) -> ~between(w, v, u)))
+h : V
+j : V
+lemma(h != null -> wp([x:=y.n](j, h, n), h != null & (j != null -> n*(h, j))))
+
+lemma(wp([x.n:=y](j, n, h), k*(h, j)))

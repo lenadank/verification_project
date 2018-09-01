@@ -1,0 +1,25 @@
+
+(null : V)
+(n* : V * V -> bool)
+
+(g : V)
+(h : V)
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+
+# ghost variables
+
+init     :=  p = h & q = null &
+             forall z (~n*(h,z) | ~n*(g,z))
+
+cond     :=  p != null
+loopBody :=  program([ q := p; p := p.n ])
+
+Q        :=  true
+post     :=  wp_ae(program([
+                      if $q != null$ then
+                         q.n := g
+                      else
+                         h := g ]), Q)    
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

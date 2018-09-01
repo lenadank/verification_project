@@ -1,0 +1,33 @@
+# @uses dtca_nested
+
+prev : V
+next : V
+h1 : V
+h2 : V
+_d* : V * V -> bool
+_r* : V * V -> bool
+
+concat := program([
+    prev := h1 ;
+	next := h1.d ; 
+    while $next != null$ { $I$ } (
+      prev := next;
+	  next := next.d
+	) ;
+	prev.d := h2 
+ ])
+
+isolated(x,y) := forall u ([d*r*](x,u) -> ~[d*r*](y,u))
+ 
+P := h1 != null & h2 != null & isolated(h1,h2) & l0(h1) = h1 & l0(h2) = h2 &
+     forall u v (_d*(u,v) <-> d*(u,v)) &
+	 forall u v (_r*(u,v) <-> r*(u,v))
+	 
+I := P & d*(h1,prev) & dtot_(prev,next)
+
+Q := forall u v (_r*(u,v) <-> r*(u,v)) &
+     forall u v (_d*(u,v) -> d*(u,v)) &
+     forall u v (([d*r*](h1,u) | [d*r*](h2,u)) & ([d*r*](h1,v) | [d*r*](h2,v)) -> 
+	             (d*(u,v) <-> _d*(u,v) | _d*(h1,u) & _d*(h2,v)))
+
+lemma(P -> wp(concat, Q))

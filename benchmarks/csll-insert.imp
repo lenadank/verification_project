@@ -1,0 +1,54 @@
+# @uses base dtcc1_ea
+
+k* : V * V -> bool
+ms : V
+mt : V
+
+h : V
+e : V
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+R : V * V -> bool
+
+# ghost
+_k* : V * V -> bool
+_ms : V
+_mt : V
+_h : V
+
+
+dtcc1(k*,ms,mt)
+dtcc1(_k*,_ms,_mt)
+
+# total order
+forall u (R(u,u))
+forall u v w (R(u,v) & R(v,w) -> R(u,w))
+forall u v (R(u,v) | R(v,u))
+
+_n*(u,v) := n*(_k*,_ms,_mt,u,v)
+
+between(k*,ms,mt,u,v,w) := (k*(u,v) & k*(v,w)) |
+  ms != null & ~(k*(u,w) & u!=w) & (k*(u,ms) & k*(mt,v) & k*(v,w)  |  k*(u,v) & k*(v,ms) & k*(mt, w))
+
+between(u,v,w) := between(k*,ms,mt,u,v,w)
+
+sorted := forall u v (between(h,u,v) & v != h -> R(u,v))
+
+init     :=  on_cycle(h) & sorted & e != null & ~n*(h,e) &
+             j = h & cntot_(h,i) & 
+             _ms = ms & _mt = mt & eqrel(_k*,k*) & _h = h
+
+program  := program([
+   while $i != h & ~(R(j,e) & R(e,i))$ {$I$} (
+      j := i ; i := i.n
+   ) ;
+   j.n := e ;
+   e.n := i ;
+   if $R(e,h) & ~R(h,e)$ then
+      h := e
+   else
+      skip
+ ])
+
+post     :=  sorted & on_cycle(h) & forall u (n*(h,u) <-> (_n*(_h,u) | u = e))

@@ -1,0 +1,45 @@
+#
+#    i := h;
+#    while $i != null$ { $I$ } (
+#       j := i ;
+#       i := i.n ;
+#       j.n := null ;
+#       void := free(j)
+#    )
+#
+
+(h : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+# ghost structures:
+(H : V)
+(L : V * V -> bool)
+(ALLOC : V -> bool)
+
+dtca(L)
+
+init     :=  i = h & j = null &
+             H = h &
+             (forall u v (L(u,v) <-> n*(u,v))) &
+             (forall v (h != null & n*(h,v) -> alloc(v))) &
+             (forall u (ALLOC(u) <-> alloc(u))) &
+             ~alloc(null)
+
+cond     :=  i != null
+loopBody :=  program([
+                j := i;
+                i := i.n;
+                j.n := null;
+                void := free(j)
+             ])
+
+post     :=  forall z (ALLOC(z) & ~L(H,z) <-> alloc(z))
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+
+# Definition
+# stable(p) := forall u v (n*(p,u) & alloc(u) & n*(u,v) -> alloc(v))
+

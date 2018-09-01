@@ -1,0 +1,40 @@
+# @uses dtca
+# @uses base
+# @uses hoare
+i: V
+h: V
+j: V
+t: V
+
+n*: V * V -> bool
+_n*: V * V -> bool
+C: V->bool
+
+
+dtca(n*)
+dtca(_n*)
+
+
+
+filter := program([
+    i := h ;
+    j := null ;
+    while $i != null$ {$I$} (
+       if $C( i )$ then ( t := i.n ; j.n := null ; j.n := t ) else j := i ; 
+       i := i.n
+    )
+  ])
+
+I := subrel(n*, _n*) & ~C(h) &
+     (i != null -> n*(h,i)) & ite(j = null, i = h, ntot_(j,i) & n*(h,j)) & 
+     forall m (m != null ->
+               ite(C(m), n*(h,m) <-> _n*(h,m) & n*(i,m),
+                         n*(h,m) <-> _n*(h,m)))
+
+
+
+
+P := eqrel(_n*, n*) & ~C(h)
+Q := forall y (n*(h,y) <-> (_n*(h,y) & ~C(y)))
+
+verify(P,filter,Q)

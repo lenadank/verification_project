@@ -1,0 +1,33 @@
+# @uses dtca
+# @uses hoare
+
+i : V
+h : V
+j : V
+m : V
+t : V
+n* : V * V -> bool
+C : V -> bool
+
+find := program([
+   i := h ; j := null ; t := null ;
+   while $i != null & t = null$ {$I$} (
+      if $C(i)$ then t := i
+      else (
+         i := i.n
+      )
+   )
+ ])
+
+dtca(n*)
+~C(null)
+
+I := (i != null -> n*(h,i)) &
+     (forall m (n*(h,m) -> ~n*(i,m) -> ~C(m))) &
+     (t != null -> C(i))
+     
+P := true
+Q := ite(i = null, ~exists m (n*(h,m) & C(m)), 
+                   C(i) & n*(h,i) & ~exists m (n*(h,m) & n+_(m,i) & C(m)))
+
+verify(P,find,Q)

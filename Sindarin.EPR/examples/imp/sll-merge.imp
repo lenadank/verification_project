@@ -1,0 +1,55 @@
+# @uses dtca base hoare
+
+h : V
+i : V
+j : V
+k : V
+x : V
+y : V
+
+n* : V * V -> bool
+n*' : V * V -> bool
+R : V * V -> bool
+
+merge := program([
+#   for simplicity, assume that i,j!=null and that R(i,j)
+    h := i ;
+    k := null ;
+    while $i != null$ {$I$} (
+       if $j = null | R(i,j)$ then (
+          k := i ;
+          i := i.n
+       )
+       else (
+          k.n := null ; k.n := j ;
+          k := j ;
+          j := j.n ;
+          k.n := null ; k.n := i
+       )
+    )
+ ])
+ 
+dtca(n*)
+dtca(n*')
+
+# Weak order (<=)
+reflexive(R) & transitive(R) & forall u v (R(u,v) | R(v,u))
+
+disjoint(n*,i,j) := forall u (u != null -> ~(n*(i,u) & n*(j,u))) 
+sorted(n*,h) := forall u v (u != v -> n*(h,u) -> n*(h,v) -> n*(u,v) -> R(u,v))
+ 
+I := disjoint(n*,i,j) & disjoint(n*',x,y) & sorted(n*',x) & sorted(n*',y) &
+     ite(k = null, i = h & R(i,j),
+                   n*(h,k) & ntot_(k,i) & (j!= null -> R(k,j))) & sorted(n*,h) & sorted(n*,j) &
+     forall u v (n*(i,u) -> (n*(u,v) <-> n*'(u,v))) &
+     forall u v (n*(j,u) -> n*(u,v) -> n*'(u,v)) &
+     (i != null -> n*'(x,i))  &
+     (j != null -> n*'(y,j))  &
+     forall u (u != null -> (n*(h,u) | n*(j,u)) <-> (n*'(x,u) | n*'(y,u))) &
+     forall u v (n*'(x,u) -> (n*(u,v) <-> n*'(u,v) | (y != null & n*'(y,v) & ~n*(j,v) & R(u,v))))
+
+P := x = i & y = j & eqrel(n*, n*') &
+     i != null & j != null & R(i,j) & disjoint(n*,i,j) & sorted(n*,i) & sorted(n*,j)
+Q := sorted(n*,h) & sorted(n*,j) & (j != null -> forall u v (n*(h,u) -> n*(j,v) -> R(u,v)))
+
+verify(P, merge, Q)

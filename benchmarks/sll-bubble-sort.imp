@@ -1,0 +1,78 @@
+#
+# bubble-sort(h) :=
+#   do
+#     i := h; j := null;
+#     swapped := false
+#     while $i != null$ (
+#       k := i.n
+#       if $k != null & i < k$ then (
+#         h := swap(h, i, j) ; swapped := true
+#       )
+#       j := i
+#       i := k
+#     )
+#   while swapped
+#
+# swap(h, i, j) :=  (* swaps i and i.n, where j.n == i *)
+#   t := i.n
+#   i.n := t.n
+#   t.n := i
+#   if $j = null$ then
+#      h := t
+#   else j.n := t
+#   return h
+#
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+
+(h0 : V) -> (h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(R : V * V -> bool)
+
+(loc10 : bool) -> (loc1 : bool)
+(swapped0 : bool) -> (swapped : bool)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# ghost variables
+L : V -> bool
+_h : V
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+init     := swapped & loc1 & 
+            _h = h &
+            forall u (L(u) <-> n*(h,u))
+
+cond     := ~(loc1 & ~swapped)
+loopBody := program([
+  if $loc1$ then (
+     swapped := false ;
+     i := h ; j := null ;
+     loc1 := false
+  )
+  else (
+     if $i = null$ then ( loc1 := true )
+     else (
+       k := i.n ;
+       if $k != null & R(k,i)$ then (
+          swapped := true ;
+          t := k.n ;
+          i.n := t ; 
+          k.n := i ;
+          if $j = null$ then h := k else j.n := k
+       ) else skip ;
+       j := i ;
+       i := k
+     )
+  )
+  ])
+
+post     := sorted(ivlco(h,null,n*))
+bad      := ~ite(cond, wp_ae(loopBody,true), post) |
+            ~(forall u (n*(h,u) <-> L(u)))

@@ -1,0 +1,53 @@
+# @uses dtcc1_ea
+#
+#    i := h; j := null;
+#    while $i != null & (i != h | j = null)$ { $I$ } (
+#       j := i ;
+#       i := i.n ;
+#       j.n := null
+#    )
+#
+
+(h : V)
+(k*0 : V * V -> bool) -> (k* : V * V -> bool)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(ms0 : V) -> (ms : V)
+(mt0 : V) -> (mt : V)
+
+# ghost structures:
+_k* : V * V -> bool
+_ms : V
+_mt : V
+
+
+dtcc1(k*,ms,mt)
+dtcc1(k*0,ms0,mt0)
+dtcc1(_k*,_ms,_mt)
+
+
+init     :=  i = h & j = null &
+             _ms = ms & _mt = mt & eqrel(_k*,k*)
+
+program := program([
+   	while $i != null & (i != h | j = null)$ {$I$} (
+		j := i;
+		i := i.n;
+		j.n := null
+    )
+ ])
+   
+_n*(u,v) := n*(_k*,_ms,_mt,u,v)
+
+post     :=  forall z (_n*(h,z) -> ktot_(z,null))
+
+# valid
+# (52 clauses)
+# (30 universal clauses)
+# PDR: 2092.44s
+# N = 10
+# 265 iterations
+# 2773 calls to SAT
+# csll-unchain.imp[univ]

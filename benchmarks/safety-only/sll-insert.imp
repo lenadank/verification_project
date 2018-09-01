@@ -1,0 +1,40 @@
+#
+# void insert(List e, List h) {
+#    @requires h ≠ null ∧ e ≠ null ∧ e⟨n*⟩null
+#    @ensures h ≠ null ∧ h⟨n*⟩e
+#  p = h;
+#  q = null;
+#  while (? && p !=null) do {
+#    q = p;
+#    p = p→n; }
+#  if (q=null) h = e else q→n = e;
+#  e→n = p 
+# }
+#
+
+
+(null : V)
+(n* : V * V -> bool)
+
+(e : V)
+(h : V)
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+
+(nondet0 : bool) -> (nondet : bool)
+
+
+init     :=   h != null &
+              e != null & ~n*(h,e) & ntot_(e,null) &
+              p = h & q = null
+
+cond     :=   nondet & p != null
+loopBody :=   program([ q := p; p := p.n ])
+
+Q        :=   true
+post     :=   wp_ae(program([
+                       if $q = null$ then h := e else q.n := e;
+                       e.n := p
+                    ]), Q)
+bad      :=   ~ite(cond, wp_ae(loopBody,true), post)
+

@@ -1,0 +1,21 @@
+# @uses dtcc1_ea
+
+(k*0 : V * V -> bool) -> (k* : V * V -> bool)
+
+(h : V)
+(x0 : V) -> (x : V)
+(y0 : V) -> (y : V)
+ms : V
+mt : V
+
+dtcc1(k*,ms,mt)
+
+init     :=  on_cycle(h) & x = h & y = null
+
+program  := program([
+   while $x != h | y = null$ {$I$} (
+      y := x ; x := x.n
+   )
+ ])
+
+post     :=  true

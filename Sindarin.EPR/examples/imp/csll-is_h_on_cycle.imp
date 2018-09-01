@@ -1,0 +1,19 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+
+is_h_on_cycle := program([
+    i := h.n ;
+	while $i != null & i != h$ {$I$} (
+	  i := i.n )
+# return $i = h$
+ ])
+
+P :=  h != null
+
+I :=  h != null & ite(on_cycle(h), i != null & n*(i,h), ~n*(i,h))
+
+Q :=  ite (i = h, on_cycle(h), i = null & ~on_cycle(h))
+
+lemma(P -> wp(is_h_on_cycle,Q))

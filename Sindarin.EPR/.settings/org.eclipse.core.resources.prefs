@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//examples/fol/unicode.fol=UTF-8
+encoding//src/analyze.py=utf-8
+encoding//src/eprv/extensions/easy_funcs.py=utf-8
+encoding//src/eprv/extensions/fresh.py=utf-8
+encoding//src/eprv/extensions/prog/while_fe.py=utf-8
+encoding//src/eprv/extensions/ternary.py=utf-8
+encoding//src/eprv/synopsis/declare.py=utf-8
+encoding//src/eprv/synopsis/fast_dr.py=utf-8
+encoding//src/eprv/synopsis/proof.py=utf-8

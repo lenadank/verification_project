@@ -1,0 +1,104 @@
+# @uses dtca base hoare
+
+# This used to work but currently has a bug :(
+
+# 
+# quicksort(h, t)
+#   v := h
+#   h := partition(h, t, v)       { mod_n = [h,t] }
+#   h := quicksort(h, v)          { mod_n = [h,v] }
+#   v := quicksort(v, t)          { mod_n = [v,t] }
+#   u := last(h)
+#   u.n := v
+#   return h
+
+
+# Summary of partition     (h=head, t=tail, v=pivot)
+# --------------------
+#  { v in [h,t) }
+#  r := partition(h, t, v)
+#  { _[h,t) = [r,null) & ~t<n*>[r,null) & [r,v) < v & [v,null) >= v }
+
+# Summary of quicksort     (h=head, t=tail)
+# --------------------
+#  { h<n*>t }
+#  r := quicksort(h, t)
+#  { _[h,t) = [r,null) & ~t<n*>[r,null) & forall u v (u,v in [r,null) & u<n*>v -> u <= v) }
+
+
+[quicksort-prog] := program([[
+	v0 := h ;
+	h := partition(h, t, h)     [$n*1$] ;
+	assume $b != _h & n*(_h,b)$ ;
+	assume $forall w z (R_en0(w,z) -> B(w,z) | B(w,h) | B(w,null)) & is_cp_ivl(B,ivlcc(h,v0,n*),n*)$ ;
+	h := quicksort(h, v0)     [$B | n*2$] ;
+	u0 := v0.n ;
+	s := last(u0) ;
+	s.n := t ;
+	assume $forall w z (R_en0(w,z) -> D(w,z) | D(w,u0) | D(w,null)) & is_cp_ivl(D,ivlcc(u0,t,n*),n*)$ ;
+	u0 := quicksort(u0, t)     [$D | n*3$] ; 
+	v0.n := u0 ;
+	u0 := last(h)             ;
+	u0.n := v0 ;
+	assume $eqrel(n*4,n*) & u_ = u0$
+ ]])
+
+wp([r:=f(...)](retvar, partition(h, t, v)) / n*_, Q) :=
+	[wp call(1field)](retvar, _n* > n* > n*_, 
+		in(v, ivlco(h,t,n*)), 
+		dtca(n*) &
+		ivlco(h,t,_n*) = ivlco(retval,null,n*) &
+		forall u (in(u,ivlco(retval,null,n*)) -> ~n*(t,u)) &
+			forall u ((in(u,ivlco(retval,v,n*)) -> u < v) &
+			          (in(u,ivlco(v,null,n*)) -> u >= v)),
+		Q)
+
+wp([r:=f(...)](retvar, quicksort(h,t)) / (A | n*_), Q) :=
+	[wp call(1field)](retvar, _n* > n* > n*_, 
+		n*(h,t),
+		dtca(n*) &
+		ivlco(h,t,_n*) = ivlco(retval,null,n*) &
+			forall u v (in(u,ivlco(retval,null,n*)) & in(v,ivlco(retval,null,n*)) &
+						 n*(u,v) -> u <= v) &
+			[frame-adapt(1exit)](A, _n*, n*, t),
+		Q)
+
+wp([r:=f(...)](retvar, last(h)), Q) :=
+	[wp call(0)](retvar, true, n*(h,retval) & forall u (n*(h,u) -> n*(u,retval)), Q)
+
+R : V * V -> bool
+
+total_order(R)
+(u < v) := ~R(v,u)
+#(u > v) := ~R(u,v)
+(u <= v) := R(u,v)
+(u >= v) := R(v,u)
+
+h : V
+t : V
+_h : V
+n* : V * V -> bool
+_n* : V * V -> bool
+n*1 : V * V -> bool
+n*2 : V * V -> bool
+n*3 : V * V -> bool
+n*4 : V * V -> bool
+
+en0 : V -> V
+A : V * V -> bool
+B : V * V -> bool
+D : V * V -> bool
+
+a : V
+b : V
+u_ : V
+
+dtca(n*)
+is_cp_ivl_total0(R_en0,ivlcc(h,t,n*),n*)
+
+P := n*(h,t) & _h = h & h != t
+     & h != a & a != t & n*(h,a) & n*(a,t) & eqrel(_n*, n*)
+Q := ivlco(_h,t,_n*) = ivlco(retval,null,n*) & forall u (in(u,ivlco(retval,null,n*)) -> ~n*(t,u)) &
+	forall u v (in(u,ivlco(retval,null,n*)) & in(v,ivlco(retval,null,n*)) & n*(u,v) -> u <= v)
+
+lemma(P -> wp([quicksort-prog], forall u v (_n*(h,u) & _n*(u,t) & n*(u,v) -> u <= v)))

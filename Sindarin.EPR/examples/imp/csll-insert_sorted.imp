@@ -1,0 +1,46 @@
+# @uses dtca_cycles
+
+h : V
+h_ : V
+prev : V
+next : V
+s : V
+_between : V * V * V -> bool
+
+R : V * V -> bool
+
+forall u (R(u,u))
+forall u v w (R(u,v) & R(v,w) -> R(u,w))
+forall u v (R(u,v) | R(v,u))
+
+insert_sorted := program([
+	prev := h ;
+    next := h.n ; 
+	while $next != h & ~(R(prev,s) & R(s,next))$ {$I$} (
+        prev := next ;
+		next := next.n
+    ) ;
+    prev.n := s ; 
+	s.n := next ;
+    if $R(s,h) & ~R(h,s)$ then 
+	  h := s
+	else 
+	  skip 
+# assert(R(prev,s))
+ ])
+
+sorted := forall u v (between(h,u,v) & v != h -> R(u,v))
+valid_input := on_cycle(h) & sorted & ~n*(h,s) & s != null
+old_is_current :=  forall u v w (_between(u,v,w) <-> between(u,v,w)) & h_ = h
+ 
+P := valid_input & old_is_current
+ 	  
+I := valid_input & old_is_current &
+     n*(h,prev) & ntot_(prev,next) & next != null &
+	 (R(s,prev) -> R(s,h)) & 
+	 ((R(s,h) & R(h,s)) -> prev = h)
+
+Q := sorted & on_cycle(h) & 
+  	  forall u ((_between(h_,u,u) | u = s) <-> n*(h,u))
+
+lemma(P -> wp(insert_sorted,Q))

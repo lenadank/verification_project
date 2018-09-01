@@ -1,0 +1,62 @@
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(g : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(R : V * V -> bool)
+
+# ghost variables
+(L : V * V -> bool)
+(H : V)
+
+dtca(L)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+# syntactic sugar
+(a < b)  := R(b,a)
+(a <= b) := ~R(b,a)
+
+init      :=  h != null & i = h & k = null &
+              j = g &
+              (forall z (~n*(h,z) | ~n*(g,z))) & 
+              sorted(ivlco(h,null,n*)) & sorted(ivlco(g,null,n*)) &
+              H = h & (forall u v (L(u,v) <-> n*(u,v)))
+
+cond      :=  i != null
+loopBody  :=  program([
+          if $j = null | i <= j$ then (
+             k := i;
+             i := i.n
+          )
+          else (
+             if $k != null$ then (
+                k.n := j;
+                k := j;
+                j := j.n;
+                k.n := i
+             )
+             else (
+                h := j;
+                j := j.n;
+                h.n := i;
+                k := h
+             )
+          )
+ ])
+
+epilogue  :=  program([ k.n := j ])
+Q         :=  sorted(ivlco(h,null,n*)) &
+              forall z (z != null -> (n*(h,z) <-> (L(H,z) | L(g,z))))
+post      :=  wp_ea(epilogue, Q)
+bad       :=  ~ite(cond, wp_ae(loopBody,true), post)
+

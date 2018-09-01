@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+encoding//src/compilation/codegen/c/ast.py=utf-8
+encoding//src/compilation/codegen/experimental_expression_compiler.py=utf-8
+encoding//src/compilation/parsing/indent/__init__.py=utf-8
+encoding//src/compilation/parsing/indent/block.py=utf-8

@@ -1,0 +1,59 @@
+# @uses dtca base hoare
+
+
+[push-many] := program([[
+	if $nondet$ then (
+		h := push(h)       [$B | n*1 | free1$] ;
+		assume $h1 = h$ ;
+		h := pushmany(h)   [$D | n*2 | free2$] ;
+		assume $h2 = h$
+	)
+	else skip ;
+	return h
+ ]])
+ 
+ 
+wp([r:=f(...)](retvar, push(h)) / (A | n*_ | free_), Q) :=
+	~free(h) &
+	forall e (
+		~free(h) & free(e) & forall u (free_(u) <-> free(u) & u!=e) & n*_(e,h) & ~n*(e,h) &
+		forall u v (~free(u) & ~free(v) -> (n*_(u,v) <-> n*(u,v))) &
+		dtca(n*_)
+		-> 
+		dr(_n* := n*, n* := n*_, retvar := e, free := free_  , Q))
+		
+		
+wp([r:=f(...)](retvar, pushmany(h)) / (A | n*_ | free_), Q) :=
+	~free(h) &
+	forall r (
+		forall u (free_(u) -> free(u)) &
+		forall u (~free_(u) & free(u) -> n*_(r,u) & n*_(u,h)) & n*_(r,h) &
+		dtca(n*_) &
+		forall u v (~free(u) & ~free(v) -> (n*_(u,v) <-> n*(u,v)))
+		->
+		dr(_n* := n*, n* := n*_, retvar := r, free := free_  , Q))
+		
+		
+h : V
+e : V
+n* : V * V -> bool
+nondet : bool
+_h : V
+h1 : V
+h2 : V
+_n* : V * V -> bool
+_free : V -> bool
+n*1 : V * V -> bool
+n*2 : V * V -> bool
+free : V -> bool
+free1 : V -> bool
+free2 : V -> bool
+
+dtca(n*)
+~free(null)
+
+P := ~free(h) & _h = h & eqrel(n*,_n*) & forall u (free(u) <-> _free(u))
+Q := forall u (free(u) -> _free(u)) &
+	forall u (~free(u) & _free(u) -> n*(h,u) & n*(u,_h))
+	
+verify(P, [push-many], Q)

@@ -1,0 +1,50 @@
+# @uses dtca_cycles_dbl
+
+h : V
+h_ : V
+prev : V
+next : V
+s : V
+_between : V * V * V -> bool
+
+R : V * V -> bool
+
+forall u (R(u,u))
+forall u v w (R(u,v) & R(v,w) -> R(u,w))
+forall u v (R(u,v) | R(v,u))
+
+insert_sorted := program([
+	prev := h ;
+    next := h.n1 ; 
+	while $next != h & ~(R(prev,s) & R(s,next))$ {$I$} (
+        prev := next ;
+		next := next.n1
+    ) ;
+    prev.n1 := s ; 
+	s.n2 := prev ;
+	next.n2 := s ;
+	s.n1 := next ;
+    if $R(s,h) & ~R(h,s)$ then 
+	  h := s
+	else 
+	  skip 
+ ])
+
+sorted := forall u v (between1(h,u,v) & v != h -> R(u,v))
+valid_input := on_cycle1(h) & sorted & 
+               s != h & s != null & 
+			   forall u ((n1*(s,u) | n1*(u,s)) -> s=u) & ~self_loop1(s) & 
+			   forall u ((n2*(s,u) | n2*(u,s)) -> s=u) & ~self_loop2(s)
+old_is_current :=  forall u v w (_between(u,v,w) <-> between1(u,v,w)) & h_ = h
+ 
+P := valid_input & old_is_current & legal_prev
+ 	  
+I := valid_input & old_is_current & legal_prev &
+     n1*(h,prev) & n1tot_(prev,next) & next != null &
+	 (R(s,prev) -> R(s,h)) & 
+	 ((R(s,h) & R(h,s)) -> prev = h)
+
+Q := sorted & on_cycle1(h) & legal_prev &
+  	  forall u ((_between(h_,u,u) | u = s) <-> n1*(h,u))
+
+lemma(P -> wp(insert_sorted,Q))

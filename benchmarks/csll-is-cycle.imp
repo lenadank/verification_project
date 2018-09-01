@@ -1,0 +1,20 @@
+# @uses dtcc1_ea
+
+k* : V * V -> bool
+
+h : V
+(i0 : V) -> (i : V)
+ms : V
+mt : V
+
+dtcc1(k*,ms,mt)
+
+init := h != null & cntot_(h,i)
+
+program := program([
+   while $i != null & i != h$ {$I$} (
+      i := i.n
+   )
+ ])
+
+post :=  (i = h <-> on_cycle(h))

@@ -1,0 +1,52 @@
+#   h1, h2; // V, h1 acyclic, not shared h1 h2, h1 not null 
+# 0 p := h1; // h1<n*>p 
+# 1 x := p.next; // h1<n*>x
+#   while (x != null)
+# 2   p := x; 
+#     x := x.next; // x type is not relevant after
+# 3 p.next := h2; // h2 type is not relevant after
+
+# @uses dtca
+
+h1 : V
+h2 : V
+n* : V * V -> bool
+p : V
+x : V
+
+dtca(n*)
+
+# {type_h1 & type_h2} p := h1 {type_h1 & type_h2 & type_p}
+type_h1 := h1 != null
+type_h2 := forall u (~(n*(h1,u) & n*(h2,u)))
+
+type_p0 := n*(h1,p) 
+
+P0 := type_h1 & type_h2
+Q0 := P0 & type_p0 
+
+lemma(P0 -> wp([x:=y](p,h1),Q0))
+
+# {P0 & type_x & type_p} x := p.next {P0 & type_x & type_p & type_p_next}
+
+type_x := n*(h1,x)
+type_p := n*(h1,p) & p != null
+
+P1 := P0 & type_x & type_p
+Q1 := P0 & type_p
+
+lemma(P1 -> wp([x:=y.n](x,p,n),Q1))
+
+# {P0 & type_x & type_p} p := x {P0 & type_x & type_p}
+P2 := P0 & type_x & type_p
+Q2 := P0 & type_p
+
+lemma(P2 -> wp([x:=y](p,x),Q2))
+
+# {P0 & type_x & type_p} p.next := h2 {type_h1 & type_h2 & type_x & type_p}
+type_h2_end := h2 != null -> (n*(h1,h2) & forall u (n*(h2,u) -> n*(h1,u)))
+
+P3 := type_p & type_h1 & type_h2
+Q3 := type_p & type_h1 & type_h2_end
+
+lemma(P3 -> wp([x.n:=y](p,n,h2),Q3)) 

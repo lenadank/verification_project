@@ -1,0 +1,55 @@
+
+# union(x,y) :=
+#   i := x ; j := y
+#   while i != null || j != null
+#     if i != null ( xroot := i ; i := i.n )
+#     if j != null ( yroot := j ; j := j.n )
+#   i := x ; j := y
+#   while i != xroot || j != yroot
+#     if i != xroot ( t := i.n ; i.n := xroot ; t := i )
+#     if j != yroot ( t := j.n ; j.n := yroot ; t := j )
+#   if xroot != yroot
+#     xroot.n := yroot
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(x : V)
+(y : V)
+(xroot0 : V) -> (xroot : V)
+(yroot0 : V) -> (yroot : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(loc10 : bool) -> (loc1 : bool)
+
+init     := loc1 & 
+            x != null &
+            y != null &
+            i = x & j = y
+
+cond     := loc1 | (i != xroot | j != yroot)
+loopBody := program([
+               if $loc1$ then (
+                  if $i != null | j != null$ then (
+                    if $i != null$ then ( xroot := i; i := i.n ) else skip ;
+                    if $j != null$ then ( yroot := j; j := j.n ) else skip
+                  )
+                  else (
+                     i := x ; j := y ;
+                     loc1 := false
+                  )
+               )
+               else (
+                 if $i != xroot$ then ( t := i.n ; i.n := xroot ; i := t )
+                                 else skip ;
+                 if $j != yroot$ then ( t := j.n ; j.n := yroot ; j := t )
+                                 else skip
+               )
+            ])
+epilogue := program([if $xroot != yroot$ then ( xroot.n := yroot ) else skip])
+
+post     := true
+bad      := ~ite(cond, wp_ae(loopBody,true), wp_ae(epilogue,post))
+

@@ -1,0 +1,38 @@
+# 
+# p = a
+# q = b
+#
+# while (p != null | q != null) {
+# 	if (p != null) then
+#		u := p;
+#		p := p.n
+# 	if (q != null) then
+#		v := q;
+#		q := q.n
+# }
+#
+
+(null : V)
+(n* : V * V -> bool)
+
+(a : V)
+(b : V)
+#(c : V)
+
+(p0 : V) -> (p : V)
+(q0 : V) -> (q : V)
+(u0 : V) -> (u : V)
+(v0 : V) -> (v : V)
+
+init     :=   a != null & b != null & a != b & p = a & q = b &
+              u = null & v = null &
+              exists z (z != null & n*(p,z) & n*(q,z))
+#              (c != null & n*(p,c) & n*(q,c))
+
+cond     :=   p != null | q != null
+loopBody :=   program([ (if $p != null$ then (u := p; p := p.n) else skip);
+                        (if $q != null$ then (v := q; q := q.n) else skip) ])
+
+post     :=   ntot_(u,null) & ntot_(v,null) & u = v
+bad      :=   ~cond & ~post
+

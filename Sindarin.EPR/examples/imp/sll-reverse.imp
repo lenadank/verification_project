@@ -1,0 +1,29 @@
+# @uses dtca
+# @uses base
+# @uses hoare
+
+i: V
+h: V
+j: V
+k: V
+
+n*: V * V -> bool
+_n*: V * V -> bool
+
+reverse:=program([
+    i := h ; j := null ;
+    while $i != null$ { $I$ } ( k:=i.n ; i.n:=j; j:=i; i:=k )
+ ])
+
+dtca(n*)
+dtca(_n*)
+
+I := forall u (u != null -> (n*(i,u) <-> ~n*(j,u))) &
+     forall u (u != null -> _n*(h,u)) &
+     forall u v (n*(i,u) -> (n*(u,v) <-> _n*(u,v))) &
+     forall u v (n*(j,u) -> (n*(u,v) <-> _n*(v,u)))
+
+P := eqrel(_n*,n*) & forall u (u != null -> n*(h,u))
+Q := forall u v (n*(u,v) <-> _n*(v,u))
+
+verify(P,reverse,Q)

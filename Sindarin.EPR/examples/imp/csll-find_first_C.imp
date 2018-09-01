@@ -1,0 +1,36 @@
+# @uses dtca_cycles
+
+h : V
+i : V
+j : V
+C :  V -> bool
+_between : V * V * V -> bool
+
+find_first_C := program([
+    i := h.n ; 
+	if $C(h)$ then 
+	  j := h 
+	else 
+	  j := null ; 
+    while $i != h & j = null$ {$I$} (
+      if $C(i)$ then 
+	    j := i 
+	  else  
+        i := i.n
+    )
+ ])
+
+P := on_cycle(h) & 
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := on_cycle(h) & n*(h,i) &
+     ite(j = null, ~C(h) & forall u (between_s(h,u,i) -> ~C(u)), 
+                   n*(h,j) & C(j) & forall u (j != h & between_s(h,u,j)  -> ~C(u))) & 
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+Q := ite(j = null, forall u (n*(h,u) -> ~C(u)), 
+                    n*(h,j) & C(j) &  forall u (j != h &  between_s(h,u,j)  -> ~C(u))) & 
+	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+lemma(P -> wp(find_first_C,Q))
+

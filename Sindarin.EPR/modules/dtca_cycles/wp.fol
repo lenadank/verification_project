@@ -1,0 +1,37 @@
+wp(`skip, Q) := Q
+wp([x:=null](x), Q) := dr(x := null, Q)
+wp([x:=y](x, y), Q) := dr(x := y, Q)
+wp([;](s1, s2), Q) := wp(s1, wp(s2, Q))
+wp(if(C, s1, s2), Q) := ite(C, wp(s1, Q), wp(s2, Q))
+wp(assume(K), Q) := K -> Q
+wp(assert(K), Q) := K & Q
+wp(return(x), Q) := dr(retval:=x, Q)
+wp(while(C,I,body),Q) := I & valid(I -> ite(C, wp(body,I), Q))
+
+wp([x.n|=y](x,`n,y),Q) := 
+				fresh(nk*, nm, nk0, nkm0, 
+				provided(nk* : V * V -> bool) &	provided(nm : V * V -> bool) & 
+				provided(nk0 : V -> V) & provided(nkm0 : V -> V) & 
+				provided(forall u v (nk*(u,v) <-> (k*(u,v) | (y !=null & ~k*(y,x) & k*(u,x) & k*(y,v))))) &
+				provided(forall u v (nm(u,v)  <-> (m(u,v) | (k*(y,x) & u = x & v = y)))) &
+				provided(forall u v (nk0(u) = v  <->  ite(k*(y,u) & k*(u,x), v = x, v = k0(u)))) &
+				provided(forall u v (nkm0(u) = v <->  ite(k*(y,u) & k*(u,x), v = y, v = km0(u))))
+				-> 
+				dr(k*(u,v) := nk*(u,v), m(u,v) := nm(u,v), k0(u) := nk0(u), km0(u) := nkm0(u), Q)) 
+				  
+wp([x:=y.n](x,y,`n),Q) := y != null &
+						  fresh(z, provided(z: V) & provided(ntot_(y,z)) -> dr(x := z, Q))
+
+wp([x.n:=null](x,`n),Q) := 
+				x != null &
+				fresh(nk*, nm, nk0, nkm0, 
+				provided(nk* : V * V -> bool) &	provided(nm : V * V -> bool) & 
+				provided(nk0 : V -> V) & provided(nkm0 : V -> V) & 
+				provided(forall u v (nk*(u,v) <-> (u = v | (x != u & k*(u,v) & k*(v,x) )| ( ~ k*(u,x) & k*(u,v)) | (~ k*(u,x) & n*(u,v) & k*(v,x))))) &
+				provided(forall u v (nm(u,v) <->  m(u,v) & ~k*(v,x))) &
+				provided(forall u v (nk0(u) = v  <->  ite(nk*(u,x), v = u, v = k0(u)))) &
+				provided(forall u v (nkm0(u) = v <->  ite(nk*(u,x), v = u, v = km0(u))))
+				-> 
+				dr(k*(u,v) := nk*(u,v), m(u,v) := nm(u,v), k0(u) := nk0(u), km0(u) := nkm0(u), Q))
+				
+[x.n:=y](x,n,y) := [;]([x.n:=null](x,n),[x.n|=y](x,n,y))

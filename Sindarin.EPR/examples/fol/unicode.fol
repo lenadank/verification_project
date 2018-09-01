@@ -1,0 +1,3 @@
+P := ¬(¬(n*(h, x)) ∧ x ≠ null) ∧ ¬(¬(n*(y, null) ∧ y ≠ null ∧ ∀w (n*(y, w) ∧ y ≠ w ➝ n*(null, w)) ∨ null = null ∧ ∀w (¬(n*(y, w) ∧ y ≠ w))) ∧ x = null) ∧ ¬(y ≠ x ∧ x = h ∧ x = null) ∧ ¬(x ≠ h ∧ ¬(n*(h, y)))
+
+lemma(P)

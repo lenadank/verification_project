@@ -1,0 +1,13 @@
+
+x : V
+R : V * V -> bool
+
+# reflexivity
+forall u (R(u,u))
+
+lemma(dr(y := x, R(x,y)))
+lemma(dr(n(z) := R(x,z), n(x)))
+lemma(dr(b := R, b(x,x)))
+
+# This should *not* be transformed because z is bounded
+#lemma(dr(z := x, forall z (R(x,z))))

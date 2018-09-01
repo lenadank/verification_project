@@ -1,0 +1,6 @@
+
+
+C : V -> bool
+
+
+lemma(forall z (dr(j := z, C(j) | forall z (dr(i := z, ~C(j))))))

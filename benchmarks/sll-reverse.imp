@@ -1,0 +1,30 @@
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+# ghost structures:
+(L : V * V -> bool)
+
+dtca(L)
+
+init     :=  i = h & j = null &
+             (forall u v (n*(h,v) & n*(u,v) -> n*(h,u))) &
+             (forall u v (L(u,v) <-> n*(u,v)))
+
+cond     :=  i != null
+loopBody :=  program([
+                k := i.n;
+                i.n := j;
+                j := i;
+                i := k
+             ])
+
+post     :=  forall z (L(h,z) <-> n*(z,h)) &
+             forall x y (L(h,x) & L(x,y) <-> n*(y,x) & n*(x,h))
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

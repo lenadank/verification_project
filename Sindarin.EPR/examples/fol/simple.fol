@@ -1,0 +1,13 @@
+
+x : V
+y : V
+P : V -> bool
+[<] : V * V -> bool
+
+m(u,v) := P(u) & ~P(v)
+
+forall u v (u < v & P(u) -> P(v))
+~(P(x) <-> P(y))
+y<x
+
+lemma(m(x,y))

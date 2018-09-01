@@ -1,0 +1,84 @@
+#
+# insert(h, e) :=
+#   i := h; j := null;
+#   while $i != null & e < i$ (
+#     j := i; i := i.n
+#   )
+#   if $j != null$ then
+#      j.n = e
+#   else
+#      h := e;
+#   e.n := i
+#
+# insert_sort(l) :=
+#   m := null
+#   k := l
+#   while $k != null$ (
+#     insert(m, k)
+#     k := k.n
+#   )
+#
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(l : V)
+(res0 : V) -> (res : V)
+(k0 : V) -> (k : V)
+
+(h0 : V) -> (h : V)
+(e0 : V) -> (e : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(R : V * V -> bool)
+
+(loc10 : bool) -> (loc1 : bool)
+
+# ghost variables
+(L : V -> bool)
+
+strong_transitive(r) := forall u v w (r(u,v) & ~r(w,v) -> r(u,w))
+
+# R is a partial order
+antisymm(R) & strong_transitive(R) & forall u (~R(u,u))
+
+init     := loc1 &
+            res = null & k = l & 
+            forall u (L(u) <-> n*(l,u))
+
+cond     := ~loc1 | k != null
+loopBody := program([
+               if $loc1$ then (
+                  e := k;
+                  k := k.n;
+                  e.n := null;
+                  h := res;
+                  i := h;
+                  j := null;
+                  loc1 := false
+               )
+               else ( 
+                  if $i != null & R(i,e)$ then (
+                     j := i;
+                     i := i.n
+                  )
+                  else (
+                    if $j != null$ then 
+                      j.n := e 
+                    else
+                      h := e ;
+# correct:          e.n := i;
+# bug:
+                    e.n := j;
+                    res := h;
+                    loc1 := true
+                  )
+               )
+            ])
+
+post     := forall y (n*(res,y) <-> L(y)) &
+            sorted(ivlco(res,null,n*))
+            
+bad      := ~ite(cond, wp_ae(loopBody,true), post)
+

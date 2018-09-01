@@ -1,0 +1,37 @@
+# Two lists over a common set of nodes.
+# Delete all elements except the head element.
+
+(h : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+
+(x : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+dtca(p*) & dtca(p*0)
+
+init        :=  h != null & i = h & j = null &
+                forall v (n*(h,v) <-> p*(h,v)) &
+                alloc(h) & stable(h) &
+                forall v (n*(h,v) <-> alloc(v))
+#                n*(hn,x) & p*(hp,x)
+
+cond     :=  in != null
+loopBody :=  program([
+                j := i;
+                i := i.n;
+                j.n := null;
+                j.p := null;
+                if $j != h$ then (
+                   void := free(j)
+                ) else skip
+             ])
+
+post     :=  ntot_(h,null) & ptot_(h,null)
+bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
+#bad         :=  ~cond & ~post
+

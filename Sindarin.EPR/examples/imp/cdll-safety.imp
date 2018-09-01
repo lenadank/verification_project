@@ -1,0 +1,19 @@
+# @uses dtca_cycles_dbl
+
+h : V
+
+remove1 := program([
+	h.n1 := null 
+ ])
+
+remove2 := program([
+	h.n2 := null 
+ ])
+ 
+P := h != null
+	 
+Q := forall u v (on_cycle1(u) & on_cycle2(u) -> (n1*(u,v) <-> n2*(u,v)))
+	   
+lemma(P -> wp(remove1,Q))
+lemma(P -> wp(remove2,Q))
+

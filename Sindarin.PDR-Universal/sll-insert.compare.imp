@@ -1,0 +1,36 @@
+
+# @uses dtca
+
+n* : V * V -> bool
+
+dtca(n*)
+
+q : V
+p : V
+h : V
+e : V
+
+Iu := ~(~n*(q,p) & q != null & p != null) &
+      ~(n*(h,e)) &
+      ~(q != null & ~n*(h,q)) &
+      forall u (~(n*(e,u) & e != u)) &
+      ~(null != p & p != h & ~n*(q,p)) &
+      p != q & e != null
+
+I := q != e & p != q & ntot_(e, null) & 
+     ~(p != h & q = null) &
+     ~n*(h,e) &
+     e != null &
+     ~(p != null & q != null & ~n*(q,p)) &
+     ~(p != null & ~n*(h,p))
+
+I0 := ~n*(h,e) & e != null & 
+     (q != null -> n*(h,q) & (p != null -> n*(q,p)) & p != q) & 
+     (p != null -> n*(h,p)) & 
+     ~n*(q,e) & ntot_(e,null)
+
+
+lemma(I -> Iu)
+lemma(Iu -> I)
+lemma(I -> I0)
+lemma(Iu -> I0)

@@ -1,0 +1,26 @@
+# @uses dtca base hoare
+
+[push] := program([[
+	e := new;
+	e.n := h ;
+	return e
+ ]])
+ 
+
+
+h : V
+free : V -> bool
+_free : V -> bool
+free_ : V -> bool
+n* : V * V -> bool
+_n* : V * V -> bool
+
+dtca(n*)
+dyna(n*, free)
+
+
+P := ~free(h) & eqpred(free, _free) & eqrel(n*, _n*)
+Q := forall u (free(u) <-> _free(u) & u != retval) & (h != null -> n*(retval,h)) &
+     forall u v (~_free(u) & ~_free(v) -> (n*(u,v) <-> _n*(u,v)))
+	
+verify(P, [push], Q)

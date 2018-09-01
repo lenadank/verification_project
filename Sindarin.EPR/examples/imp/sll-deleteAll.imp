@@ -1,0 +1,32 @@
+
+# @uses dtca
+
+i: V
+h: V
+j: V
+n*: V * V -> bool
+_n*: V * V -> bool
+
+
+deleteAll:=program([
+    i := h;
+    while $i != null$ { $I$ } (
+       j := i ;
+       i := i.n ;
+       j.n := null
+    )
+ ])
+ 
+dtca(n*)
+dtca(_n*)
+
+
+I := forall m w (n*(i,m) -> (n*(m,w) <-> _n*(m,w))) &
+     forall m (_n*(h,m) & ~_n*(i,m) -> ntot_(m,null)) &
+     (i != null -> _n*(h,i))
+
+P := forall x y (n*(x,y) <-> _n*(x,y))
+Q := forall x (_n*(h,x) -> ntot_(x,null))
+
+
+lemma(P -> wp(deleteAll,Q))

@@ -1,0 +1,35 @@
+
+# create() :=
+#   h := null ;
+#   while $C(h)$ {$I$} (
+#      i := new ;
+#      i.n := null ; i.n := h ;
+#      h := i
+#   )
+#   return h
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+(mer0 : bool) -> (mer : bool)
+
+(C : V -> bool)
+(h0 : V) -> (h : V)
+(i0 : V) -> (i : V)
+
+(x : V)
+
+init     :=  h = null & ~mer & x != null & alloc(x)
+
+cond     :=  C(h) & ~mer
+loopBody :=  program([
+                i := new;
+                if $i != null$ then
+                   ( i.n := h; h := i )
+                else
+                   mer := true
+             ])
+
+post     :=  true
+bad      :=  ~ite(cond, wp_ae(loopBody, true), post)

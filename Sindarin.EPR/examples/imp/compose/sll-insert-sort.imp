@@ -1,0 +1,75 @@
+# @uses dtca hoare base
+
+[insert-sort-prog] := program([[
+	i := h.n ;
+	if $i != null$ then (
+		k := insert_sort(i) [$B | n*1$] ;
+		k := insert(k, h, i)  [$D | n*2$] ;
+		assume $k_ = k$
+	)
+	else k := h ;
+	return k
+ ]])
+	
+	
+
+R : V * V -> bool
+
+total_order(R)
+(u < v) := ~R(v,u)
+#(u > v) := ~R(u,v)
+(u <= v) := R(u,v)
+(u >= v) := R(v,u)
+
+
+[insert-P](h,e,en,A) := h != null & e != null & ntot_(e,en) &
+	sorted_ivl(ivlco(h,null,n*), n*, [<=]) & ~in(e,ivlco(h,null,n*))
+[insert-M](h,e,en,A) := is_cp_ivl_totalN(A, ivlcc(e,en,_n*) | ivlco(h,null,_n*), _n*)
+[insert-Q](h,e,en,A) := dtca(n*) & forall u (n*(retval,u) <-> _n*(h,u) | u=e) & 
+	sorted_ivl(ivlco(retval,null,n*), n*, [<=]) &
+	[frame-adapt](A, _n* > n*)
+	
+wp([r:=f(...)](retvar, insert(h,e,en)) / (A | n*_), Q) :=
+	[wp call(1field)](retvar, _n* > n* > n*_, [insert-P](h,e,en,A), [insert-Q](h,e,en,A) & [insert-M](h,e,en,A), Q)
+
+	
+[insert-sort-P](h,A) := h != null
+[insert-sort-M](h,A) := is_cp_ivl_totalN(A, ivlco(h,null,_n*), _n*)
+[insert-sort-Q](h,A) := dtca(n*) & forall u (n*(retval,u) <-> _n*(h,u)) &
+	sorted_ivl(ivlco(retval,null,n*), n*, [<=]) &
+	[frame-adapt](A, _n* > n*)
+	
+wp([r:=f(...)](retvar, insert_sort(h)) / (A | n*_), Q) :=
+	[wp call(1field)](retvar, _n* > n* > n*_, [insert-sort-P](h,A), [insert-sort-Q](h,A) & [insert-sort-M](h,A), Q)
+
+h : V
+_h : V
+k : V
+k_ : V
+
+n* : V * V -> bool
+_n* : V * V -> bool
+n*1 : V * V -> bool
+n*2 : V * V -> bool
+
+en0 : V -> V
+B : V * V -> bool
+D : V * V -> bool
+
+# Bound N on sharing + starting points
+z1 : V
+z2 : V
+z3 : V
+z4 : V
+z5 : V
+[N constants] := []|z1|z2|z3|z4|z5
+
+dtca(n*)
+
+is_cp_ivl(R_en0, ivlco(h,null,n*), n*)
+
+P := h != null & _h = h & eqrel(_n*,n*)
+Q := sorted_ivl(ivlco(retval,null,n*), n*, [<=]) &
+	 ivlco(_h,null,_n*) = ivlco(retval,null,n*)
+
+verify(P, [insert-sort-prog], Q)

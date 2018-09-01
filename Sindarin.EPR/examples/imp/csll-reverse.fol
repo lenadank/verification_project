@@ -1,0 +1,82 @@
+# @uses dtca_cycles
+
+i : V
+j : V
+h : V
+_between : V * V * V -> bool
+
+#program([
+#    i := h ; j := null ;
+#    while $i != null$ { $I$ } ( t:=i.n ; i.n:=j ; j:=i ; i:=t )
+# ])
+
+loopbody   := [;]([x:=y.n+fre](t,i,n), 
+			  [;]([x.n:=y+fre](i,n,j),
+              [;]([x:=y](j,i),
+                  [x:=y](i,t))))
+
+I1 := forall u (u != null -> n*(i,u) | n*(j,u)) &
+      forall u (u != null -> n*(u,h)) &
+      forall u (u != null & n*(i,u) & n*(j,u) -> u = h) &
+      (i = null -> j = h) & h != null &
+	  (j = null -> i = h) &
+	  (j != null & i != null -> ~m(h,h))
+	  
+	 
+P1 := forall u v (u != null & v != null -> n*(u,v)) & h != null
+Q1 := P1
+
+lemma(I1 & i != null -> wp(loopbody, I1))
+lemma(P1 & i = h & j = null -> I1)
+lemma(I1 & i = null -> Q1)
+
+
+
+I2 := I1 &
+	  forall u (_between(h,u,h)) &
+	  forall u v (_between(h,u,j) & _between(h,v,j) -> 
+				 (_between(h,u,v) <-> between(v,u,h))) &
+	  forall u v w (_between(i,u,h) & _between(i,v,h) & _between(i,w,h) -> 
+				   (_between(u,v,w) <-> between(u,v,w))) &
+	  forall u v  (_between(h,u,j) & _between(i,v,h)  ->    between(h,u,v))
+			
+			
+
+
+
+
+P2 := forall u v (u != null & v != null -> n*(u,v)) & h != null &
+      forall u v w (_between(u,v,w) <-> between(u,v,w))
+Q2 := forall u v (u != null & v != null -> n*(u,v)) & h != null &
+      forall v w (_between(h,v,w) <-> between(w,v,h))
+	
+
+#lemma(I2 & i != null -> wp(loopbody, I2))
+
+#lemma(P1 -> forall u (u != null -> between(h,u,h)))
+
+x : V
+y : V
+#lemma(between(i,x,h) & i != x -> wp(loopbody,between(i,x,h)))
+#lemma(I1 & i != null & between(j,x,h) -> wp(loopbody,between(j,x,h)))
+#X lemma(I1 & i != null & between(j,x,h) & between(x,y,h) -> wp(loopbody,between(j,x,h) & between(x,y,h) & I1))
+#lemma(P2 & i = h & j = null -> wp(loopbody, forall u (u != null & i != null -> between(i,u,h))))
+#lemma(P2 & i = h & j = null -> I2)
+#lemma(I2 & i = null -> Q2)
+
+LO : V * V -> bool
+forall u v (_between(h,u,v) <-> LO(u,v))
+forall u v w (_between(u,v,w) & _between(w,v,u) -> u=v | v=w | u=w)
+
+iside := forall u v (between(i,u,h) -> (between(u,v,h) <-> _between(u,v,h)))
+#lemma(I1 & i != null & iside & i != h -> wp(loopbody, iside))
+
+
+u : V
+v : V
+jside := forall u v (v != null & between(j,u,h) -> (between(u,v,h) <-> _between(h,v,u)))
+jside' := v!= null -> (between(j,u,h) -> (between(u,v,h) <-> _between(h,v,u)))
+
+I1 & i != null & jside & iside & j != h & j != null & _between(h,j,i)
+
+lemma(wp(loopbody, jside'))

@@ -1,0 +1,71 @@
+# @uses dtca
+# @uses base
+# @uses hoare
+
+#
+# Something modest.
+#
+# union(x,y) :=
+#   t := find(x) ;
+#   s := find(y) ;
+#   if $t != s$ then t.p := s
+#
+
+[union-prog] := program([[
+	t := find(x) [$B | p*1$] ;
+	s := find(y) [$D | p*2$] ;
+	if $t != s$ then t.p := s
+	else skip
+ ]])
+
+
+##
+# Summary of find
+_is_root(u) := forall v (_p*(u,v) -> u=v)
+
+[find-P](x,A) := x != null
+[find-M](x,A) := is_cp_totalN(A,x,_p*)
+[find-Q](x,A) := _p*(x,retval) & _is_root(retval) & 
+	forall u v (u!=null & v!=null & A(u,u) & A(v,v) -> (p*(u,v) <-> u=v | v=retval)) &
+	[frame-adapt](A, _p* > p*)
+
+wp([r:=f(...)](retvar, find(x)) / (A | p*_), Q) :=
+	[wp call(1field)](retvar, _p* > p* > p*_, [find-P](x,A), [find-Q](x,A) & [find-M](x,A), Q)
+
+
+x : V
+y : V
+t_ : V
+s : V
+p* : V * V -> bool
+_p* : V * V -> bool
+p*1 : V * V -> bool
+p*2 : V * V -> bool
+
+en0 : V -> V
+B : V * V -> bool
+D : V * V -> bool
+
+z0 : V
+z1 : V
+
+[N constants] := []|z0|z1
+
+a : V
+
+dtca(p*)
+
+#forall u v (F0(u,v) -> F0(v,v))
+
+is_cp_dual(A,h1,h2,n*) := forall u v w (A(u,v) -> 
+	ite(v=null, ~(n*(u,w) & (n*(h1,w) | n*(h2,w))), 
+		n*(u,v) & (n*(h1,v) | n*(h2,v)) & (n*(u,w) & (n*(h1,w) | n*(h2,w)) -> n*(v,w))))
+#is_cp_dual_total0(A,h1,h2,n*) := is_cp_dual(A,h1,h2,n*) & forall u w (R_en0(u,w) -> A(u,w)) 
+
+is_cp_dual(R_en0,x,y,p*)
+P := eqrel(_p*,p*) & x!=null & y!=null
+Q := t_=t -> _p*(x,t) & _p*(y,s) & _is_root(t) & _is_root(s) &
+	forall u v (_p*(x,u) -> (p*(u,v) <-> u=v | v=t | v=s)) &
+	forall u v (_p*(y,u) -> (p*(u,v) <-> u=v | v=s))
+
+verify(P, [union-prog], Q)

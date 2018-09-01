@@ -1,0 +1,17 @@
+
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+h : V
+(x0 : V) -> (x : V)
+(y0 : V) -> (y : V)
+
+init     :=  x = h & y = null
+
+program  := program([
+   while $x != null$ {$I$} (
+      y := x; x := x.n 
+   )
+ ])
+
+post     :=  y != null -> n*(h,y) & ntot_(y,null)
+

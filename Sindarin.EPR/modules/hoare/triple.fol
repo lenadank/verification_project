@@ -1,0 +1,1 @@
+verify(P, program, Q) := lemma(P -> wp(program, Q))

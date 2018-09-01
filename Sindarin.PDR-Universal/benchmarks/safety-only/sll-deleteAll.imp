@@ -1,0 +1,32 @@
+#
+#    i := h;
+#    while $i != null$ { $I$ } (
+#       j := i ;
+#       i := i.n ;
+#       j.n := null ;
+#       void := free(j)
+#    )
+#
+
+(h : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+init     :=  i = h & j = null &
+             (forall v (h != null & n*(h,v) -> alloc(v))) &
+             ~alloc(null)
+
+cond     :=  i != null
+loopBody :=  program([
+                j := i;
+                i := i.n;
+                j.n := null;
+                void := free(j)
+             ])
+
+post     :=  true
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

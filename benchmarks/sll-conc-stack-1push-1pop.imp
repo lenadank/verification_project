@@ -1,0 +1,61 @@
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(alloc0 : V -> bool) -> (alloc : V -> bool)
+
+(g : V)
+(h0 : V) -> (h : V)
+(x10 : V) -> (x1 : V)
+(x20 : V) -> (x2 : V)
+(t10 : V) -> (t1 : V)
+(t20 : V) -> (t2 : V)
+(nondet0 : bool) -> (nondet : bool)
+
+(loc110 : bool) -> (loc11 : bool)
+(loc120 : bool) -> (loc12 : bool)
+(loc130 : bool) -> (loc13 : bool)
+(loc140 : bool) -> (loc14 : bool)
+
+(loc210 : bool) -> (loc21 : bool)
+(loc220 : bool) -> (loc22 : bool)
+(loc230 : bool) -> (loc23 : bool)
+(loc240 : bool) -> (loc24 : bool)
+
+init := loc11 & ~loc12 & ~loc13 & ~loc14 &
+        loc21 & ~loc22 & ~loc23 & ~loc24 &
+        (h != null -> alloc(h) & forall u (n*(h,u) -> alloc(u)))
+
+cond := (loc12 -> x1 != null) & (loc22 -> t2 != null)
+loopBody := program([
+  if $nondet$ then (
+    if $loc11$ then ( x1 := new ; loc11 := false ; loc12 := true )
+    else if $loc12$ then ( t1 := h ; loc12 := false ; loc13 := true )
+    else if $loc13$ then ( x1.n := t1 ; loc13 := false ; loc14 := true )
+    else if $loc14$ then (
+      flag := cas(h, t1, x1) ; loc14 := false ;
+      if $flag$ then loc11 := true else loc12 := true
+    ) else skip
+  ) else (
+    if $loc21$ then ( t2 := h ; loc21 := false ; loc22 := true )
+    else if $loc22$ then ( x2 := t2.n ; loc22 := false ; loc23 := true )
+    else if $loc23$ then ( 
+      flag := cas(h, t2, x2) ; loc23 := false ;
+      if $flag$ then loc24 := true else loc21 := true
+    )
+    else if $loc24$ then (
+      void := free(t2) ; loc24 := false ; loc21 := true
+    ) else skip
+  )
+ ])
+
+
+bad      :=  ~(cond -> wp_ae(loopBody,true))
+
+# valid
+# * The inferred formula is an inductive invariant!
+# (77 clauses)
+# (17 universal clauses)
+# PDR: 1849.42s
+# N = 14
+# 161 iterations
+# 3941 calls to SAT
+

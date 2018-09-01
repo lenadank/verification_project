@@ -1,0 +1,62 @@
+null : V
+
+#
+# \Gamma_{linOrd}
+# ---------------
+# properties that a (finite) relation r has to uphold so that there will
+# exist a function f such that r = f*.
+#
+reflexive(r) := forall u (r(u,u))
+transitive(r) := forall u v w (r(u,v) & r(v,w) -> r(u,w))
+lin(r) := forall u v w (r(u,v) & r(u,w) -> (r(v,w) | r(w,v)))
+antisymm(r) := forall u v (r(u,v) -> r(v,u) -> u=v)
+
+reflisolated(r, u) := forall v ((r(u,v) | r(v,u)) -> u=v)
+
+dtca(r) := reflexive(r) & transitive(r) & lin(r) & antisymm(r) & reflisolated(r,null)
+
+
+# 
+# Formulation of cyclic-enabled n* via two auxiliary relations k* and m
+# (see latex)
+#
+
+k* : V * V -> bool
+dtca(k*)
+
+m : V * V -> bool
+forall u v w (k*(u,v) & m(u,w) -> u = v)
+forall u v w (m(u,v) & m(u,w) -> v = w)
+forall u v (m(u,v) -> k*(v,u))
+~m(null,null)
+
+k0 : V -> V
+km0 : V -> V
+
+forall u (k*(u,k0(u)) & m(k0(u),km0(u)) & k*(km0(u),u) | u = k0(u) & u = km0(u) & forall v w (k*(u,v) & m(v,w) -> ~k*(w,u)))
+
+forall u v w (R_k0(u, v) & R_k0(u, w) -> v = w)
+forall u v w (R_km0(u, v) & R_km0(u, w) -> v = w) 
+forall u v (R_k0(u,v) -> R_k0(v,v)) 
+forall u v (R_km0(u,v) -> R_km0(v,v))   
+forall x y z (R_k0(x,y) & R_km0(x,z) -> R_k0(z,y)) 
+forall x y z (R_k0(x,y) & R_km0(x,z) -> R_km0(y,z)) 
+
+#
+# User-friendly macros
+#
+
+f+_(f*,u,v) := f*(u,v) & u != v
+f_(f*,u,v) := f+_(f*,u,v) & forall w (f+_(f*,u,w) -> f*(v,w))
+
+k+_(u,v) := f+_(k*,u,v)
+
+n*(u,v) := k*(u,k0(v))
+n+_(u,v) := f+_(n*,u,v)
+ntot_(u,v) := f_(k*,u,v) | m(u,v) | (v = null & forall w (~k+_(u,w) & ~m(u,w)))
+
+on_cycle(u) := m(k0(u),km0(u))
+
+between(u,v,w) := (k*(u,v) & k*(v,w)) | (k*(u,k0(v)) & k*(v,w) & ~f+_(k*,u,w)) | (k*(u,v) & k*(v,k0(w)) & ~f+_(k*,u,w))
+
+self_loop(u) := m(u,u)

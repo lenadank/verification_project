@@ -1,0 +1,48 @@
+
+# COMPOSITIONAL REASONING (OMG!)
+
+# ~ bottom-up modularity (procedure call)
+[wp call(0)](retvar, [summary-P], [summary-Q], Q) :=
+	[summary-P] &
+	forall u ( dr(retval := u, [summary-Q]) -> dr(retvar := u, Q) )
+
+[wp call(1field)](retvar, _n* > n* > n*_, [summary-P], [summary-Q], Q) :=
+	[summary-P] &
+	forall u ( 
+	     dr(retval := u, n* := n*_, _n* := n*, [summary-Q]) -> 
+	     dr(retvar := u, n* := n*_, Q) )
+
+# ~ cutpoint defs
+is_cp(A,h,n*) := forall u v w (A(u,v) -> ite(v=null, ~(n*(u,w) & n*(h,w)), n*(u,v) & n*(h,v) & (n*(u,w) & n*(h,w) -> n*(v,w))))
+is_cp_total0(A,h,n*) := is_cp(A,h,n*) & forall u w (R_en0(u,w) -> A(u,w)) 
+is_cp_totalN(A,h,n*) := is_cp(A,h,n*) & [N-bounded func](A)
+is_cp_total(A,h,n*) := is_cp(A,h,n*) & forall u v (exists w (A(u,w)))
+
+is_cp_ivl(A,iv,n*) := forall u v w (A(u,v) -> ite(v=null, ~(n*(u,w) & in(w,iv)), n*(u,v) & in(v,iv) & (n*(u,w) & in(w,iv) -> n*(v,w))))
+is_cp_ivl_total0(A,iv,n*) := is_cp_ivl(A,iv,n*) & forall u w (R_en0(u,w) -> A(u,w)) 
+is_cp_ivl_totalN(A,iv,n*) := is_cp_ivl(A,iv,n*) & [N-bounded func](A)
+
+# ~ Bounded function
+either(B, u, v | w) := either(B,u,v) | B(u, w)
+either(B, u, `[]) := false
+[bounded func](B, [list of constants]) := forall u v (R_en0(u,v) -> either(B, u, [list of constants]|v|null))
+[N-bounded func](B) := [bounded func](B, [N constants])
+
+# ~ framing
+[frame-adapt](A, _n* > n*) := [frame-adapt](A, _n*, n*)
+#   @@ this is a quirk of the rewriting engine
+[frame-adapt](A, _n*, n*) :=
+	n*(null,null) & reflisolated(n*,null) &
+ 	forall u v au (u != null & v != null & A(u,au) ->
+		(n*(u,v) <-> au!=null & A(v,v) & n*(au,v) |
+					 ~A(u,u) & ~A(v,v) & _n*(u,v)) )
+
+[frame-adapt(1exit)](A, _n*, n*, t1) :=
+	n*(null,null) & reflisolated(n*,null) &
+	forall u v au (u != null & v != null & A(u,au) & A(v,v) ->
+		(n*(u,v) <-> n*(au,v))) &
+	forall u v (u != null & v != null & A(u,u) & ~A(v,v) ->
+		(n*(u,v) <-> n*(u,t1) & _n*(t1,v))) &
+	forall u v au av (u != null & v != null & ~A(u,u) & ~A(v,v) & A(u,au) & A(v,av) ->
+		( n*(u,v) <-> n*(au,v) | (au=av & _n*(u,v)) ))
+		

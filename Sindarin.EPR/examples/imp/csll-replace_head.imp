@@ -1,0 +1,36 @@
+# @uses dtca_cycles
+
+h : V
+h_ : V
+t : V
+i : V
+j : V
+_between : V * V * V -> bool
+
+replace_head := program([
+    i := h ; j := null ;
+    while $i != h | j = null$ {$I$} (
+       j := i ;
+       i := i.n
+    ) ;
+	j.n := t ;
+	i := h.n ;
+	t.n := i ;
+	h := t 
+ ])
+
+P := h_ = h & 
+	  on_cycle(h)  & ~n*(h,t) & t != null &
+ 	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+I := h_ = h & on_cycle(h)  & n*(h,i) & ~n*(h,t) & t != null &
+      ite(j = null, i = h, n*(h,j) & ntot_(j,i)) &
+ 	  forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+Q := h = t & ~n*(h,h_) & 
+	  forall u v w u1 v1 w1
+		(_between(h_,u,u) & _between(h_,v,v) & _between(h_,w,w) &
+		ite(u=h_, u1=t, u1=u) & ite(v=h_, v1=t, v1=v) & ite(w=h_, w1=t, w1=w) ->
+			               (_between(u,v,w) <-> between(u1,v1,w1)))
+	  
+lemma(P -> wp(replace_head,Q))

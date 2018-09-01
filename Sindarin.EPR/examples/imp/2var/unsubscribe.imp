@@ -1,0 +1,32 @@
+# @uses hoare
+
+Users: V -> bool
+Subscriptions: V * V -> bool
+
+[event.Newsletter]: V
+[event.User]: V
+
+wp([r:=f(...)](retvar, delete(R, cond)), Q) :=
+  dr(R(a,b) := R(a,b) & ~cond(a,b), Q)
+
+
+#
+# Query =
+# DELETE FROM Subscriptions WHERE a=eventNewsletter AND b=eventUser
+#
+cond(a,b) := a=[event.Newsletter] & b=[event.User]
+
+[unsubscribe-prog] := program([[
+  void := delete(Subscriptions, cond)
+  ]])
+
+
+#P := Subscriptions(nwr, usr) & usr != [event.User]
+#Q := Subscriptions(nwr, usr)
+
+P := forall u (Users(u) -> exists nl (Subscriptions(nl,u)))
+     & forall u nl (Subscriptions(nl,u) -> Users(u))
+     & exists nl (forall u (Users(u) -> Subscriptions(nl,u)))
+Q := exists nl (forall u (Users(u) -> Subscriptions(nl,u)))
+
+verify(P, [unsubscribe-prog], Q)

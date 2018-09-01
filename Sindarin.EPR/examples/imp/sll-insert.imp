@@ -1,0 +1,35 @@
+# @uses dtca
+
+# Inserts an element into a singly-linked list, whose head is h, just before the element x.
+# The precondition states that x must be different from h.
+
+x : V
+e : V
+h : V
+i : V
+j : V
+
+n* : V * V -> bool
+
+prog := program([
+  i := h; j := null;
+  while $i != x & i != null$ {$I$} (
+    j := i;
+    i := i.n
+  ) ;
+  j.n := e; e.n := i
+ ])
+ 
+ 
+dtca(n*)
+
+
+I := h != null & n+_(h,x) & e != null & ntot_(e,null) & ~n*(h,e) &
+     ite(j = null, i = h, n*(h,j) & ntot_(j,i)) &
+     n*(i,x)
+ 
+ 
+P := h != null & n+_(h,x) & e != null & ntot_(e,null) & ~n*(h,e)
+Q := h != null & n*(h,e) & ntot_(e,x)
+
+lemma(P -> wp(prog, Q))

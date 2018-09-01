@@ -1,0 +1,40 @@
+
+(null : V)
+(n* : V * V -> bool)
+(p* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(e : V)
+(x : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+
+dtca(p*)
+
+init        :=  h != null & (n*(h,x) | x = null) &
+                ptot_(h,null) &
+                e != null & ~n*(h,e) & ntot_(e,null) & ptot_(e,null) &
+                (forall u v (n*(u,v) <-> p*(v,u))) &
+                i = h & j = null
+
+cond        :=  i != x & i != null
+loopBody    :=  program([
+                   j := i;
+                   i := i.n
+                ])
+
+epilogue    :=  program([
+                   if $j != null$ then j.n := e else h := e;
+                   e.n := i;
+                   if $i != null$ then i.p := e else skip;
+                   e.p := j
+                ])
+
+Q           :=  n*(h,e) & ntot_(e,x) & ptot_(h,null) &
+                (forall u v (n*(u,v) <-> p*(v,u)))
+
+post        :=  wp_ae(epilogue, Q)
+bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
+

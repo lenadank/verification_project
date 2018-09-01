@@ -1,0 +1,59 @@
+#   h; // V, h acyclic, h not null (empty list is trivial)
+# 0 p1 := h; // h<n*>p1
+#   p2 := null;  
+#   while(p1 != null)
+# 1   x := p1; // x = h or ~x<n*>h, x is temporary
+#     p1 := p1.next;
+# 2   x.next := p2; // x<n*>h. x type is changed
+# 3   p2 := x; // p2<n*>h
+
+h : V
+p1 : V
+p2 : V
+x : V
+n* : V * V -> bool
+
+# @uses dtca
+
+dtca(n*)
+
+# {type_h} p1 := h {type_h & type_p1}
+
+type_h := h != null
+type_p1 := n*(h,p1)
+
+P0 := type_h
+Q0 := type_h & type_p1
+
+lemma(P0 -> wp([x:=y](p1,h),Q0))
+
+# {type_h & type_p1} x:= p1 {type_h & type_p1 & type_x}
+
+type_p1_1 := (p1 = h) | ~n*(p1,h)  
+type_x := (x = h) | ~n*(x,h)
+
+P1 := P0 & type_p1_1
+Q1 := P0 & type_p1_1 & type_x
+
+lemma(P1 -> wp([x:=y](x,p1),Q1))
+
+# This part is not working:
+
+# {type_h & type_p2 & type_x} x.next := p2 {type_h & type_p2 & type_x}
+
+type_p2 := null | n*(p2,h)
+type_x_2 := n*(x,h)
+
+P2 := P0 & type_p2 & type_x
+Q2 := P0 & type_p2 & type_x_2
+
+lemma(P2 -> wp([x.n:=y](x,n,p2),Q2))
+
+# {type_h & type_p2 & type_x} p2 := x {type_h & type_p2}
+
+type_p2_3 := n*(p2,h)
+
+P3 := P0 & type_p2 & type_x_2
+Q3 := P0 & type_p2_3
+
+lemma(P3 -> wp([x:=y](p2,x),Q3)) 

@@ -1,0 +1,60 @@
+# @uses dtca hoare base
+h : V
+n* : V * V -> bool
+h : V
+g : V
+
+i : V
+j : V
+k : V
+
+C : V -> bool
+
+# ghost structures:
+_h : V
+_n* : V * V -> bool
+
+dtca(n*)
+dtca(_n*)
+
+init     :=  i = h & j = null & _h = h &
+             g = null & k = null &
+             (forall u v (_n*(u,v) <-> n*(u,v)))
+
+program  :=  program([
+   while $i != null$ {$I$} (
+      if $~C(i)$ then (
+         if $i = h$ then
+            h := i.n
+         else
+            ( t := i.n; j.n := t );
+         if $g = null$ then
+            g := i
+         else
+            k.n := i;
+         k := i;
+         i := i.n;
+         k.n := null
+      )
+      else (
+         j := i;
+         i := i.n
+      )
+   )
+ ])
+
+post     :=   (forall u (h != null & n*(h,u) -> C(u)))
+#             (forall v (g != null & n*(g,v) -> ~C(v))) &
+#             (forall z (z != null -> (_n*(_h,z) <-> n*(h,z) | n*(g,z)))) &
+#             (forall x y (_n*(_h,x) & _n*(x,y) & C(x) & C(y) -> n*(x,y))) &
+#             (forall x y (_n*(_h,x) & _n*(x,y) & ~C(x) & ~C(y) -> n*(x,y)))
+
+I := (h != null -> ~n*(h,g) & ~n*(h,k)) &
+     (i != null -> n*(h,i) & ~n*(i,g) & ~n*(i,k)) & 
+     (ite(j = null, i = h, n*(h,j) & ntot_(j,i))) &
+     forall u (u != null & n*(h,u) & ~n*(i,u) -> C(u))
+
+I0 := ∀x0 (¬(n*(k, x0)) ∨ _n*(x0, k)) ∧ (g = null ∨ _n*(_h, g)) ∧ ∀x1 (∀x2 (_n*(x2, k) ∨ _n*(x2, _h) ∨ n*(x2, x1) ∨ ¬(_n*(x2, x1)))) ∧ (_n*(g, i) ∨ g = null ∨ null = i) ∧ ∀x3 (∀x4 (¬(_n*(_h, x4)) ∨ _n*(x3, x4) ∨ n*(x4, x3) ∨ ¬(_n*(_h, x3)) ∨ _n*(g, x3))) ∧ (g = null ∨ ¬(C(g))) ∧ ∀x5 (¬(C(x5)) ∨ ¬(n*(g, x5)) ∨ g = k) ∧ (¬(h = k) ∨ null = k) ∧ (¬(null = j) ∨ _n*(i, h)) ∧ (h = i ∨ _n*(j, i) ∨ null = i) ∧ ∀x6 (n*(x6, k) ∨ ¬(j = null) ∨ _n*(x6, g) ∨ ¬(_n*(x6, k))) ∧ ∀x7 (_n*(k, x7) ∨ ¬(n*(j, x7)) ∨ _n*(x7, j) ∨ g = k) ∧ ∀x8 (∀x9 (n*(x8, x9) ∨ n*(_h, x9) ∨ ¬(_n*(x8, x9)) ∨ ¬(_n*(_h, x8)) ∨ n*(_h, x8))) ∧ ∀x10 (_n*(x10, j) ∨ g = _h ∨ n*(x10, g) ∨ ¬(_n*(x10, g))) ∧ ∀x11 (∀x12 (∀x13 (¬(_n*(x11, x13)) ∨ ¬(_n*(x13, x12)) ∨ _n*(x11, _h) ∨ ¬(j = _h) ∨ n*(x11, x13) ∨ _n*(x11, g) ∨ n*(x13, x12)))) ∧ ∀x14 (∀x15 (_n*(x14, x15) ∨ ¬(n*(x14, x15)))) ∧ (null = i ∨ ¬(j = i)) ∧ (_h = g ∨ _h = h) ∧ (h = null ∨ _n*(_h, h)) ∧ ∀x16 (n*(x16, k) ∨ ¬(_n*(x16, k)) ∨ ¬(_h = j) ∨ _n*(x16, j)) ∧ ∀x17 (¬(k = i) ∨ x17 = h ∨ C(x17) ∨ ¬(_n*(h, x17))) ∧ ∀x18 (∀x19 (j = _h ∨ _n*(x19, j) ∨ ¬(_n*(x18, g)) ∨ ¬(C(_h)) ∨ n*(x19, x18) ∨ ¬(_n*(x19, x18)))) ∧ (null = i ∨ _n*(k, i) ∨ g = k) ∧ ∀x20 (¬(n*(x20, j)) ∨ ¬(_n*(h, x20)) ∨ h = null ∨ C(x20)) ∧ ∀x21 (¬(_n*(_h, x21)) ∨ _n*(h, x21) ∨ ¬(n*(x21, h))) ∧ ∀x22 (j = x22 ∨ ¬(_n*(j, x22)) ∨ _n*(j, k) ∨ _n*(i, x22)) ∧ (¬(n*(j, k)) ∨ j = null) ∧ ∀x23 (_n*(i, x23) ∨ ¬(_n*(k, x23)) ∨ _n*(k, j) ∨ k = x23) ∧ (n*(h, j) ∨ j = null) ∧ n*(g, k) ∧ ∀x24 (n*(_h, x24) ∨ ¬(h = null) ∨ ¬(_n*(_h, x24)))
+
+verify(init, program, post)
+

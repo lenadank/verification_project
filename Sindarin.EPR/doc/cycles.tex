@@ -1,0 +1,383 @@
+\documentclass[11pt,a4paper,oneside,draft]{article}
+
+\setlength{\columnsep}{20pt}
+\usepackage{ifdraft}
+
+\usepackage[margin=1cm, bottom=2cm]{geometry}
+\usepackage{amsthm, amsmath, amssymb, latexsym,  enumerate, cleveref, xfrac}
+\def\rmdefault{ptm}
+
+\usepackage{alltt}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{example}[definition]{Example}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{lemma}[definition]{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{notation}[definition]{Notation}
+
+\newcommand{\bi}{\begin{itemize}
+\setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\be}{\begin{enumerate}
+\setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+
+\newcommand{\lp}{{\cal L}}
+
+\newcommand{\g}{\Gamma}
+\def\d{\Delta}
+\newcommand{\su}{\supset}
+\newcommand{\w}{\wedge}
+
+\newcommand{\st}{{\ : \ }}   % such that
+
+\newcommand{\fv}[1]{{Fv[#1]}}
+
+\newcommand{\nin}{\not\in}
+\newcommand{\nmodels}{\not\models}
+
+\newcommand{\vd}{\vdash}
+
+\newcommand{\bs}{\bigskip}
+\newcommand{\ms}{\medskip}
+\newcommand{\til}{,\dots,}
+\newcommand{\tup}[1]{{\langle #1 \rangle}}
+\newcommand{\dom}[1]{{\vert #1 \vert}}
+
+\newcommand{\fe}{\varphi}
+\newcommand{\ra}{\rightarrow}
+
+\newcommand{\suq}{\subseteq}
+
+\usepackage[usenames]{color}
+\newcommand{\ori}[1]{{{{\textcolor{blue}{Ori: {\em #1}}}}}}
+
+
+\makeatletter
+\def\stack#1#2{%
+  \mathchoice
+    {\@stack{\displaystyle}{#1}{#2}}%
+    {\@stack{\textstyle}{#1}{#2}}%
+    {\@stack{\scriptstyle}{#1}{#2}}%
+    {\@stack{\scriptscriptstyle}{#1}{#2}}%
+}
+\newdimen\@stackwda
+\newdimen\@stackwdb
+\def\@stack#1#2#3{%
+  \settowidth{\@stackwda}{$#1 #2$}%
+  \settowidth{\@stackwdb}{$#1 #3$}%
+  \advance\@stackwda-\@stackwdb
+  \@stackwda=.5\@stackwda
+  \everymath{#1\everymath{}}%
+  \renewcommand{\arraystretch}{.6}%
+  \setlength{\arraycolsep}{0em}%
+  \ifnum\@stackwda<\z@ \hskip\@stackwda\fi%
+  \begin{array}[t]{c}
+    #2\\#3
+  \end{array}
+  \ifnum\@stackwda<\z@ \hskip\@stackwda\fi%
+}
+\makeatother
+
+\title{Extensions of CAV}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Cycles extension - copied from the CAV paper}
+
+\newcommand{\nextf}{\textit{next}}
+\newcommand{\B}[1]{\langle{#1}\rangle}
+\newcommand{\Lor}{\bigvee}
+\newcommand{\AF}{\mbox{$\textit{AF}^R$}}
+\newcommand{\tabref}[1]{Table~\ref{Ta:#1}}
+\newcommand{\figref}[1]{Fig.~\ref{Fi:#1}}
+
+Instead of keeping track of just $\nextf^*$, we instrument the edge
+addition operation with a check: if the added edge is about to close
+a cycle, then instead of adding the edge, we keep it in a separate relation $m$ of
+``cycle-inducing'' edges. Two properties of lists now come into play:
+%\begin{enumerate}
+%  \item 
+(1)~The number of cycles reachable from program variables, and hence the size of $M$, is bounded by the number of program variables;
+(2)~Any path (simple or otherwise) in the heap may utilize at most one
+    of those edges, because once a path enters a cycle, there is no way out.
+%\end{enumerate}
+In all assertions, therefore, we replace $\alpha\B{\nextf^*}\beta$ with:
+%
+%\begin{center}
+$\alpha\B{\nextf^*}\beta \lor
+   \Lor_{\langle u,v\rangle\in M}
+      (\alpha\B{\nextf^*}u \land v\B{\nextf^*}\beta)$.
+%\end{center}
+Notice that it is possible to construct this formula thanks to the bound on
+the size of $M$; otherwise, an existential quantifier would have been required
+in place of the disjunction.
+
+\medskip
+Cycles can also be combined with nesting, in such a way as to introduce
+an unbounded number of cycles. To illustrate this, consider the example
+of a linked list beginning at $h$ and formed by a pointer field which we
+shall denote $n$, where each element serves as the head of a singly-linked
+cycle along a second pointer field $m$. This is basically the same as
+in the case of acyclic nested lists, only that the last node in every
+sub-chain (a list segment formed by $m$) is connected to the first node
+of that same chain.
+
+One way to model this in a simple way is to assume that the programmer
+designates the last edge of each cycle; that is, the edge that goes back
+from the last list node to the first.
+We denote this designation by introducing a ghost field named $c$. This
+cycle-inducing edge is thus labeled $c$ instead of $m$.
+
+Properties of the nested data structure can be expressed with $\AF$ formulas
+as shown in \tabref{nested-cyclic-list-props}. ``Hierarchy'' means
+that the primary list is contiguous, that is, there cannot be $n$-pointers
+originating from the middle of sub-lists. ``Cycle edge'' describes the closing
+of the cyclic list by a special edge $c$.
+
+We were able to verify the absence of memory errors and the correct 
+functioning of the program {\tt flatten}, shown in \figref{flatten}.
+
+\bgroup
+
+\newcommand\via[1]{\langle #1 \rangle}
+
+\newcommand\vianpre{\via{\underline{n}}}
+\newcommand\vianrtcpre{\via{\underline{n}^*}}
+\newcommand\vianrtc{\via{n^*}}
+\newcommand\viamrtc{\via{m^*}}
+\newcommand\viarrtc{\via{r^*}}
+
+\renewcommand\a{\alpha}
+\renewcommand\b{\beta}
+\renewcommand\c{\gamma}
+
+\newcommand\nn[2]{#1\vianrtc #2}
+\newcommand\mm[2]{#1\viamrtc #2}
+\newcommand\clink[2]{#1\via{c}#2}
+
+\begin{table}
+\centering
+\begin{tabular}{|l|l|}
+\hline
+  All lists are acyclic & $sll(n^*) \land sll(m^*)$ \\
+\hline
+  No sharing between lists &
+   $\begin{array}{@{}l@{\;}l}
+      \forall\a,\b,\c\!:  &\nn h\a \land \mm\a\b \;\land\\ 
+                          &\nn h\c \land \mm\c\b \implies \a=\c
+    \end{array}$ \\
+\hline
+  Hierarchy &
+   $\forall \a,\b,\c:  \a\neq\b \land \b\neq\c \land \mm\a\b \implies \lnot\nn\b\c$ \\
+\hline
+  Cycle edge &
+   $\begin{array}{@{}l@{\;}l}
+      \forall \a,\b,\c: \a\neq\b \land \a\neq\c \land \nn\a\b \implies \lnot \clink\a\c \\
+      \forall \a,\b: \clink\b\a \implies \nn h\a \land \mm\a\b
+    \end{array}$ \\
+\hline
+\end{tabular}
+\caption{\label{Ta:nested-cyclic-list-props}Properties of a list of cyclic lists expressed in $\AF$}
+\end{table}
+
+\begin{figure}
+\begin{alltt}\small
+\begin{tabbing}
+No\=de flatten(Node h) \{\+\\
+Node i = h, j = null;\\
+wh\=ile (i != null) I1 \{\+\\
+Node k = i;\\
+wh\=ile (k != null) I2 \{\+\\
+j = k; k = k.m;\-\\
+\}\\
+j.c = null;\\
+i = i.n; j.m = null; j.m = i;\-\\
+\}\\
+j.c = null; j.c := h;\\
+return h;\-\\
+\}
+\end{tabbing}
+\end{alltt}
+\caption{\label{Fi:flatten}A program that flattens a hierarchical structure of lists into a single cyclic list.}
+\end{figure}
+
+\newpage
+
+\section{Cycles}
+\begin{itemize}
+\item The commands speak about $n$ field, and $\tup{n^*}$ is used in the assertions.
+
+\item Behind the scenes we have an acyclic relation $\langle k^* \rangle$,
+and an auxiliary binary relation denoted by $\tup{m}$.
+
+\item $\alpha \tup{n^*} \beta$ in the assertions is translated to: $\alpha \tup{k^*} \beta \lor \vec{nk}(\alpha) \tup{k^*} \beta$.
+
+\item $\tup{k^*}$ is axiomatized with $\Gamma_{lin}$ as in the CAV paper.
+\item Extra Axioms:
+\begin{itemize}
+\item $(A)$ $\forall \alpha,\beta,\gamma.~ \alpha \tup{k^*} \beta \land \alpha  \tup{m} \gamma \to
+\alpha=\beta$
+(there cannot be $k$ and $m$ from the same node)
+\item $(B)$  $\forall \alpha,\beta,\gamma.~ \alpha \tup{m} \beta \land \alpha \tup{m} \gamma \to
+\beta=\gamma$
+\item $(C)$  $\forall \alpha,\beta.~ \alpha \tup{m} \beta \to \beta \tup{k^*} \alpha$
+\end{itemize}
+
+\item Additionally, two unary function symbols are used: $\vec{k}$ and $\vec{km}$.
+\begin{itemize}
+
+\item $\vec{k}( \alpha)$: 
+\begin{itemize}
+\item Intended meaning: the last node reachable from $ \alpha$ via $n$.
+\item Axiom: $\forall \alpha,\beta.~ \alpha \tup{k^*} \beta \to \beta  \tup{k^*} \vec{k}( \alpha)$
+\end{itemize}
+
+\item $\vec{km}( \alpha)$: 
+\begin{itemize}
+\item Intended meaning: the node reachable from $\vec{k}( \alpha)$ via $m$.
+\item Axiom: 
+$\forall \alpha,\beta,\gamma.~ \alpha \tup{k^*} \beta \land \beta \tup{m} \gamma  \to \vec{km}(\alpha) = \gamma$
+\item Axiom: $\forall \alpha.~  \vec{k}(\alpha) \tup{m} \vec{km}(\alpha) ~ \lor ~ \vec{km}(\alpha) = \vec{k}( \alpha)$
+
+\end{itemize}
+
+Their properties ensure they can be used in EPR (these properties {\bf follow} from the previous ones and the general theory for $\tup{k^*}$):
+\begin{itemize}
+\item Idempotence: $\forall \alpha.~\vec{k}(\vec{k}(\alpha))=\vec{k}(\alpha)$ 
+\item Idempotence: $\forall \alpha.~\vec{km}(\vec{km}(\alpha))=\vec{km}(\alpha)$
+\item $\forall \alpha.~\vec{km}(\vec{k}(\alpha))=\vec{km}(\alpha)$ 
+\item $\forall \alpha.~\vec{k}(\vec{km}(\alpha))=\vec{k}(\alpha)$ 
+\end{itemize}
+\end{itemize}
+
+
+\item A predicate $Between(\alpha,\beta,\gamma)$ standing for ``there is a simple path
+from $\alpha$ to $\gamma$ through $\beta$" can be defined by:
+$$Between(\alpha,\beta,\gamma):= (\alpha \tup{k^*} \beta \tup{k^*} \gamma)
+\lor (\vec{km}(\alpha) \tup{k^*} \beta \tup{k^*} \gamma)
+\lor (\alpha \tup{k^*} \beta \tup{k^*} \vec{k}(\alpha) \land \vec{km}(\alpha) \tup{k^*} \gamma)$$
+
+Using $Between(\alpha,\beta,\gamma)$ only, the programmer is not aware of our internal troubles with $k,m$ and $\vec{km},\vec{k}$.
+
+\item A predicate $OnCycle(\alpha)$ standing for ``$\alpha$ is on a cycle" is defined by:
+$(\vec{k}(\alpha) \tup{m} \vec{km}(\alpha) \land \vec{km}(\alpha) \tup{k^*} \alpha)$
+
+\item To compute the weakest pre-conditions of $x.n := null$ use a microcode:
+
+1: if  $OnCycle(x)$ \\
+2: \qquad $s := \vec{k}(x)$ \\
+3: \qquad $t := \vec{km}(x)$ \\
+4: \qquad $x.k := null$ \\
+5: \qquad $s.m := null$ \\
+6: \qquad if $s \neq x$ \\
+7: \qquad \qquad  $s.k := t$ (we may assume that $s.k = null$)\\
+8: else \\
+9: \qquad $x.k := null$
+
+
+\item To compute the weakest pre-conditions of $x.n := y$ use a microcode (assuming that $x.n := null$ was performed immediately before)
+
+1: if  $y \tup{k^*} x$ \\
+2: \qquad $x.m := y$   (we may assume that $x.m = null$)\\
+3: else \\
+4: \qquad $x.k := y$ (we may assume that $x.k = null$)\\
+
+
+\item To compute the weakest pre-conditions of $x := y.n$ use a microcode
+
+%1: if  $(\vec{k}(y) = y \land y \neq  \vec{km}(y)) \lor y  \tup{m} y$ \\
+1: if  $\vec{k}(y) = y$ \\
+2: \qquad $x := y.m$ \\
+3: else \\
+4: \qquad $x := y.k$
+
+
+\item additions to $wp$ for function symbols:
+
+\begin{itemize}
+\item $x.k := y$ (assuming that $x.k = x.m = null$):
+\begin{itemize}
+\item substitute $\vec{k}(\alpha)$ by $ite(\vec{k}(\alpha)=x, \vec{k}(y), \vec{k}(\alpha))$
+\item substitute $\vec{km}(\alpha)$ by $ite(\vec{k}(\alpha)=x, \vec{km}(y), \vec{km}(\alpha))$
+\end{itemize}
+\item $x.m := y$ (assuming that $x.k = x.m = null$):
+\begin{itemize}
+\item no change in $\vec{k}(\alpha)$
+\item substitute $\vec{km}(\alpha)$ by $ite(\vec{k}(\alpha)=x, y, \vec{km}(\alpha))$
+\end{itemize}
+\item $x.k := null$:
+\begin{itemize}
+\item substitute $\vec{k}(\alpha)$ by $ite(\alpha \tup{k^*} x, x, \vec{k}(\alpha))$
+\item substitute $\vec{km}(\alpha)$ by $ite(\vec{k}(x)\neq x \land \alpha \tup{k^*} x, x,\vec{km}(\alpha))$
+\end{itemize}
+\item $x.m := null$
+\begin{itemize}
+\item no change in $\vec{k}(\alpha)$
+\item substitute $\vec{km}(\alpha)$ by $ite(\vec{k}(\alpha)=x , x, \vec{km}(\alpha))$
+\end{itemize}
+
+\end{itemize}
+
+
+
+
+\end{itemize}
+
+\section{Nested Linked List}
+
+\begin{itemize}
+
+\item The commands speak about $d$ (down) and $r$ (right) field.
+\item The assertions may include $\tup{d^*}$, $\tup{r^*}$, $\tup{(d\cup r)^*}$.
+
+\item This only works when there is no sharing ---
+if $r(\alpha)=\beta$ then: $r(\gamma)=\beta$ iff $\gamma=\alpha$, and $d(\gamma)\neq\beta$ for every $\gamma$.
+\begin{itemize}
+\item Add to the pre-condition of $x.r := y$ the fact that $y$ does not become shared:
+$\forall \alpha. ~ (\alpha \tup{d^*} y \to \alpha=y) \land (\alpha \tup{r^*} y \to \alpha=y)$. 
+Make this a conjunct in the $wp$ of $x.r := y$.
+
+\item Add to the pre-condition of $x.d := y$ the fact that $y$ does not become shared:
+$\forall \alpha. ~ (\alpha \tup{r^*} y \to \alpha=y)$. 
+Make this a conjunct in the $wp$ of $x.d := y$.
+
+\end{itemize}
+
+\item One unary function symbol are used: $\overleftarrow{r}$.
+\begin{itemize}
+\item $\overleftarrow{r}(\alpha)$: 
+\begin{itemize}
+\item Intended meaning: the first node that can reach $ \alpha$ via $n$.
+\item Axiom: $\forall \alpha,\beta. \beta \tup{r^*} \alpha \to \overleftarrow{r}(\alpha) \tup{r^*} \beta$
+\item Idempotence: $\forall \alpha.~\overleftarrow{r}(\overleftarrow{r}(\alpha))=\overleftarrow{r}(\alpha)$ 
+\end{itemize}
+
+
+\end{itemize}
+
+\item $\alpha \tup{(d\cup r)^*} \beta$ in the assertions is translated to: $\alpha \tup{n^*} \overleftarrow{r}(\beta)$.
+
+
+
+\end{itemize}
+
+
+
+
+
+\end{document}

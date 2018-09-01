@@ -1,0 +1,51 @@
+# @uses dtca
+# @uses base
+# @uses hoare
+
+[deleteAll] := program([[
+   if $h != null$ then (
+      j := h.n ;
+      h.n := null ;
+      void := free(h) ;
+      void := deleteAll(j)    [$B | n*_ | free_$]
+   )
+   else skip
+  ]])
+
+h : V
+_h : V
+n* : V * V -> bool
+n*_ : V * V -> bool
+_n*: V * V -> bool
+free : V -> bool
+free_ : V -> bool
+_free : V -> bool
+
+A : V * V -> bool
+B : V * V -> bool
+
+dtca(n*)
+dyna(n*, free)
+
+
+wp([r:=f(...)](_, free(x)), Q) := noref(h, n*) & dr(free(u) := free(u) | u=x, Q)
+
+# TODO: the specification of deleteAll is, in fact, a *global* specificaion
+#       (can make a local one and use the adaptation rule)
+wp([r:=f(...)](_, deleteAll(h)) / (A | n*_ | free_), Q) :=
+	dominates(h, n*) & noref(h, n*) &
+	(forall u v (n*_(u,v) <-> ite(n*(h,u) | (n*(h,v) & h!=v), u=v, n*(u,v))) &
+	 forall u (u != null -> (free_(u) <-> free(u) | n*(h,u)))
+	 ->
+	 dr(n* := n*_, free := free_, Q))
+	
+dominates(h, n*) := forall u v (n*(h,u) & n*(v,u) -> n*(v,h) | n*(h,v))
+noref(h, n*) := forall u (n*(u,h) -> u=h)
+
+
+P := dominates(h, n*) & noref(h, n*) & _h=h & eqpred(_free, free) & eqrel(_n*, n*)
+Q := forall u v (n*(u,v) <-> ite(_n*(_h,u) | (_n*(_h,v) & _h!=v), u=v, _n*(u,v))) &
+     forall u (u != null -> (free(u) <-> _free(u) | _n*(_h,u)))
+
+verify(P, [deleteAll], Q)
+

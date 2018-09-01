@@ -1,0 +1,53 @@
+
+# find(e) :=
+#   i := e
+#   while i != null
+#     root := i ; i := i.n
+#   i := e
+#   while i != root
+#     j := i.n ; i.n := root ; j := i
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(e : V)
+(root0 : V) -> (root : V)
+
+(i0 : V) -> (i : V)
+
+(loc10 : bool) -> (loc1 : bool)
+
+# ghost variables
+(re : V)
+(L : V * V -> bool)
+
+init     := loc1 & 
+            e != null & n*(e, re) & ntot_(re,null) &
+            i = e &
+            (forall u v (L(u,v) <-> n*(u,v)))
+
+cond     := loc1 | i != root
+loopBody := program([
+               if $loc1$ then (
+                  if $i != null$ then (
+                     root := i;
+                     i := i.n
+                  )
+                  else (
+                     i := e ;
+                     loc1 := false
+                  )
+                )
+                else (
+                   j := i.n ;
+                   i.n := root ;
+                   i := j
+                )
+            ])
+
+post     := root = re &
+            forall z (n*(z,re) <-> L(z,re)) &
+            forall z (L(e,z) & L(z,re) & z != re -> ntot_(z,re)) &
+            forall x y (~L(x,re) & L(x,y) -> n*(x,y))
+bad      := ~ite(cond, wp_ae(loopBody,true), post)
+

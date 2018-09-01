@@ -1,0 +1,48 @@
+# @uses dtca_cycles
+
+C : V -> bool
+x : V
+y: V
+h : V
+i : V
+_between : V * V * V -> bool
+
+prog := program([
+   i := h ; t := null ;
+   while $j != h & t = null$ {$I$} (
+      if $C(i)$ then t := i
+      else (
+         j := i ; i := i.n
+      )
+   ) ;
+   if $i != null$ then (
+      if $j = null$ then h := i.n
+      else ( t := i.n ; j.n := null ; j.n := t )
+   )
+   else skip
+ ])
+
+~C(null)
+
+x != null & y != null
+
+I := n*(h,x) & n*(x,y) &
+     (i != null -> n*(h,i)) &
+     ite(j = null, i=h, n*(h,j) & ntot_(j,i)) &
+     (forall l (n*(h,l) & ~n*(i,l) -> ~C(l))) &
+     (t != null -> C(i)) &
+ 	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+     
+P := ntot_(j,i) &
+	 n*(h,x) & n*(x,y) & 
+	 forall u v w (_between(u,v,w) <-> between(u,v,w))
+
+	 Q := (n*(x,y) <-> (x = y | y != i)) &
+	  i != null & (i != h | j = null) -> C(i) &
+	  C(i) -> forall u (_between(h,u,i) -> between(h,u,i))
+
+lemma(I & ~(i != null & (i != h | j = null) & t = null) -> false)
+
+#lemma(P -> wp(prog,Q))
+

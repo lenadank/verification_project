@@ -1,0 +1,22 @@
+P : V -> bool
+
+f : V -> V
+g : V -> V
+k10 : V -> V
+k20 : V -> V
+m : V * V -> bool
+
+idempotent(f) :=
+   forall u v w (f(u) = v & f(u) = w -> v = w)  &
+   forall u v (f(u) = v -> f(v) = v) 
+
+idempotent(f)
+
+# These are unsat
+lemma(forall u (f(f(u)) = f(u)))
+lemma(forall u (f(f(u)) != u | P(f(u)) | ~P(u)))
+lemma(forall u (exists v (f(u)=v)))
+
+# These should be sat
+lemma(forall u (P(f(u))))
+lemma(exists u (P(f(f(u)))))

@@ -1,0 +1,55 @@
+# partitions a list h into two lists h and g according to
+# truth value of a predicate C
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(g0 : V) -> (g : V)
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(C : V -> bool)
+
+# ghost structures:
+(_h : V)
+(_n* : V * V -> bool)
+
+dtca(_n*)
+
+init     :=  i = h & j = null & _h = h &
+             g = null & k = null &
+             (forall u v (_n*(u,v) <-> n*(u,v)))
+
+program  :=  program([
+   while $i != null$ {$I$} (
+      if $~C(i)$ then (
+         if $i = h$ then
+            h := i.n
+         else
+            ( t := i.n; j.n := t );
+         if $g = null$ then
+            g := i
+         else
+            k.n := i;
+         k := i;
+         i := i.n;
+         k.n := null
+      )
+      else (
+         j := i;
+         i := i.n
+      )
+   )
+ ])
+
+post     :=  (forall u (h != null & n*(h,u) -> C(u))) &
+             (forall v (g != null & n*(g,v) -> ~C(v))) &
+             (forall z (z != null -> (_n*(_h,z) <-> n*(h,z) | n*(g,z)))) &
+             (forall x y (_n*(_h,x) & _n*(x,y) & C(x) & C(y) -> n*(x,y))) &
+             (forall x y (_n*(_h,x) & _n*(x,y) & ~C(x) & ~C(y) -> n*(x,y)))
+
+bad      :=  ~ite(cond, wp_ae(loopBody,true), post)
+

@@ -1,0 +1,108 @@
+null : V
+
+#
+# \Gamma_{linOrd}
+# ---------------
+# properties that a (finite) relation r has to uphold so that there will
+# exist a function f such that r = f*.
+#
+reflexive(r) := forall u (r(u,u))
+transitive(r) := forall u v w (r(u,v) & r(v,w) -> r(u,w))
+lin(r) := forall u v w (r(u,v) & r(u,w) -> (r(v,w) | r(w,v)))
+antisymm(r) := forall u v (r(u,v) -> r(v,u) -> u=v)
+
+reflisolated(r, u) := forall v ((r(u,v) | r(v,u)) -> u=v)
+
+dtca(r) := reflexive(r) & transitive(r) & lin(r) & antisymm(r) & reflisolated(r,null)
+
+
+# 
+# Formulation of cyclic-enabled n* via two auxiliary relations k* and m
+# (see latex)
+#
+
+k1* : V * V -> bool
+k2* : V * V -> bool
+m1 : V * V -> bool
+m2 : V * V -> bool
+
+m_for_k(k*,m) := forall u v w (k*(u,v) & m(u,w) -> u = v) &
+				 forall u v w (m(u,v) & m(u,w) -> v = w) &
+				 forall u v (m(u,v) -> k*(v,u)) &
+				 ~m(null,null)
+
+dtca(k1*)
+dtca(k2*)
+m_for_k(k1*,m1)				
+m_for_k(k2*,m2)
+				
+k10 : V -> V
+k20 : V -> V
+km10 : V -> V
+km20 : V -> V
+
+
+valid_k0_km0(k*,m,k0,km0) := forall u (k*(u,k0(u)) & m(k0(u),km0(u)) & k*(km0(u),u) | 
+    u = k0(u) & u = km0(u) & forall v w (k*(u,v) & m(v,w) -> ~k*(w,u)))
+
+valid_k0_km0(k1*,m1,k10,km10)
+valid_k0_km0(k2*,m2,k20,km20)
+
+k0_km0_properties(R_k0,R_km0) := forall u v w (R_k0(u, v) & R_k0(u, w) -> v = w) &
+								 forall u v w (R_km0(u, v) & R_km0(u, w) -> v = w) &
+								 forall u v (R_k0(u,v) -> R_k0(v,v)) &
+								 forall u v (R_km0(u,v) -> R_km0(v,v)) &   
+								 forall x y z (R_k0(x,y) & R_km0(x,z) -> R_km0(y,z) & R_k0(z,y)) 
+
+k0_km0_properties(R_k10,R_km10)
+k0_km0_properties(R_k20,R_km20)
+
+#
+# User-friendly macros
+#
+
+f+_(f*,u,v) := f*(u,v) & u != v
+f_(f*,u,v) := f+_(f*,u,v) & forall w (f+_(f*,u,w) -> f*(v,w))
+
+k1+_(u,v) := f+_(k1*,u,v)
+k2+_(u,v) := f+_(k2*,u,v)
+
+n*(k*,k0,u,v) := k*(u,k0(v))
+n1*(u,v) := n*(k1*,k10,u,v)
+n2*(u,v) := n*(k2*,k20,u,v)
+
+n1+_(u,v) := f+_(n1*,u,v)
+n2+_(u,v) := f+_(n2*,u,v)
+
+ntot_(k*,m,u,v) := f_(k*,u,v) | m(u,v) | (v = null & forall w (k*(u,v) & u != v & ~m(u,w)))
+n1tot_(u,v) := ntot_(k1*,m1,u,v)
+n2tot_(u,v) := ntot_(k2*,m2,u,v)
+
+on_cycle(m,k0,km0,u) := m(k0(u),km0(u))
+on_cycle1(u) := on_cycle(m1,k10,km10,u)
+on_cycle2(u) := on_cycle(m2,k20,km20,u)
+
+between(k*,k0,u,v,w) := (k*(u,v) & k*(v,w)) | (k*(u,k0(v)) & k*(v,w) & ~f+_(k*,u,w)) | (k*(u,v) & k*(v,k0(w)) & ~f+_(k*,u,w))
+between1(u,v,w) := between(k1*,k10,u,v,w)
+between2(u,v,w) := between(k2*,k20,u,v,w)
+
+self_loop1(u) := m1(u,u)
+self_loop2(u) := m2(u,u)
+
+legal_prev := forall u v w (between1(u,v,w) <-> between2(w,v,u)) & 
+		      forall u (self_loop1(u) <-> self_loop2(u))
+
+
+overlapping_cycles := forall u v (on_cycle1(u) & on_cycle2(u) -> (n1*(u,v) <-> n2*(u,v)))
+
+#overlapping_cycles
+
+#forall u v w (R_k20(u,v) & R_k10(u,w) -> (R_k10(v,w) | R_k10(v,v)))
+#forall u v w (R_k20(u,v) & R_km10(u,w) -> (R_km10(v,w) | R_km10(v,v)))
+#forall u v w (R_km20(u,v) & R_k10(u,w) -> (R_k10(v,w) | R_k10(v,v)))
+#forall u v w (R_km20(u,v) & R_km10(u,w) -> (R_km10(v,w) | R_km10(v,v)))
+
+#forall u v w (R_k10(u,v) & R_k20(u,w) -> (R_k20(v,w) | R_k20(v,v)))
+#forall u v w (R_k10(u,v) & R_km20(u,w) -> (R_km20(v,w) | R_km20(v,v)))
+#forall u v w (R_km10(u,v) & R_k20(u,w) -> (R_k20(v,w) | R_k20(v,v)))
+#forall u v w (R_km10(u,v) & R_km20(u,w) -> (R_km20(v,w) | R_km20(v,v)))

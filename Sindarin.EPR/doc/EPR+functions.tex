@@ -1,0 +1,274 @@
+\documentclass[11pt,a4paper,oneside]{article}
+
+\setlength{\columnsep}{20pt}
+\usepackage{ifdraft}
+
+%\usepackage[margin=1cm, bottom=2cm]{geometry}
+\usepackage{amsthm, amsmath, amssymb, latexsym,  enumerate, cleveref, xfrac}
+%\def\rmdefault{ptm}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{example}[definition]{Example}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{lemma}[definition]{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{notation}[definition]{Notation}
+
+\newcommand{\bi}{\begin{itemize}
+\setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+\newcommand{\ei}{\end{itemize}}
+\newcommand{\be}{\begin{enumerate}
+\setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}
+\newcommand{\ee}{\end{enumerate}}
+\newcommand{\bd}{\begin{description}}
+\newcommand{\ed}{\end{description}}
+
+\newcommand{\lp}{{\cal L}}
+
+\newcommand{\g}{\Gamma}
+\def\d{\Delta}
+\newcommand{\su}{\supset}
+\newcommand{\w}{\wedge}
+
+\newcommand{\st}{{\ : \ }}   % such that
+
+\newcommand{\fv}[1]{{Fv[#1]}}
+
+\newcommand{\nin}{\not\in}
+\newcommand{\nmodels}{\not\models}
+
+\newcommand{\vd}{\vdash}
+
+\newcommand{\bs}{\bigskip}
+\newcommand{\ms}{\medskip}
+\newcommand{\til}{,\dots,}
+\newcommand{\circtil}{\circ \dots \circ}
+
+\newcommand{\tup}[1]{{\langle #1 \rangle}}
+\newcommand{\dom}[1]{{\vert #1 \vert}}
+\newcommand{\abs}[1]{{\vert #1 \vert}}
+
+\newcommand{\fe}{\varphi}
+\newcommand{\ra}{\rightarrow}
+
+\newcommand{\suq}{\subseteq}
+\newcommand{\tr}[1]{\mathsf{tr}[#1]}
+
+
+\makeatletter
+\def\stack#1#2{%
+  \mathchoice
+    {\@stack{\displaystyle}{#1}{#2}}%
+    {\@stack{\textstyle}{#1}{#2}}%
+    {\@stack{\scriptstyle}{#1}{#2}}%
+    {\@stack{\scriptscriptstyle}{#1}{#2}}%
+}
+\newdimen\@stackwda
+\newdimen\@stackwdb
+\def\@stack#1#2#3{%
+  \settowidth{\@stackwda}{$#1 #2$}%
+  \settowidth{\@stackwdb}{$#1 #3$}%
+  \advance\@stackwda-\@stackwdb
+  \@stackwda=.5\@stackwda
+  \everymath{#1\everymath{}}%
+  \renewcommand{\arraystretch}{.6}%
+  \setlength{\arraycolsep}{0em}%
+  \ifnum\@stackwda<\z@ \hskip\@stackwda\fi%
+  \begin{array}[t]{c}
+    #2\\#3
+  \end{array}
+  \ifnum\@stackwda<\z@ \hskip\@stackwda\fi%
+}
+\makeatother
+
+\title{Extensions of EPR with functions}
+
+\begin{document}
+
+%\maketitle
+
+\sloppy
+
+\section{Function Symbol Elimination in EPR}
+
+It is well-known that validity of $\forall\exists$-formulas over a relational vocabulary (only relation and constant symbols) with equality is decidable. We try to recognize some general cases in which the addition of unary function symbols preserves the decidability. Moreover, as we prefer avoid devising new decision procedures, we are interested in performing reductions to EPR, and apply an off-the-shelf EPR-solver.
+
+Assume a first-order signature $\Sigma_{\cal F}$ consisting of relation symbols, constant symbols and a set ${\cal F}$ of unary function symbols.
+Suppose we are given a $\forall\exists$-formula $\fe_{\cal F}$ and a (finite) set $\Gamma_{\cal F}$ of universal formulas
+in this signature.
+We are interested to decide whether $ \Gamma_{\cal F} \vdash \fe_{\cal F}$ (i.e. $\fe_{\cal F}$ follows from $\Gamma_{\cal F}$ in FOL).
+Initially, unary function symbols can be replaced by binary relations (that correspond to the graphs of the functions). We first produce an equivalent unnested formula $\fe$ and theory $\Gamma$ (in which all atomic formulas have the form $R(x_1 \til x_k)$, $f(x) \approx y$, or $c\approx y$). By choosing the quantifiers correctly we can ensure that $\fe$ and $\Gamma$ remain a $\forall\exists$-formula and a set of universal formulas respectively (e.g. in $\fe$ we only add universal quantifiers in negative occurrences and existential quantifiers in positive occurrences). Next, for every function symbol in ${\cal F}$, we replace in $\Gamma$ and $\fe$ the atomic formulas of the form $f(x) \approx y$  by $R_f(x,y)$, where $R_f$ is a new binary relation symbol.
+We denote the new signature (with binary relations instead of unary functions) by $\Sigma$.
+ Each new relation $R_f$ should have two properties:
+\begin{itemize}
+\item $PF^f = \forall x,y,z. R_f(x,y) \land R_f(x,z) \ra y\approx z$ 
+\item $TOT^f= \forall x. \exists y. R_f(x,y)$ 
+\end{itemize}
+We now have that $ \Gamma_{\cal F} \vdash \fe_{\cal F}$ iff 
+$PF , TOT , \Gamma \vd \fe$
+where
+$PF=\bigwedge_f PF^f$ and $TOT=\bigwedge_f TOT^f$.
+$PF$ and $\Gamma$ are universal and cause no problem.
+On the other hand, $TOT$ is $\forall\exists$, and thus it cannot work as an assumption
+(entailment of $\forall\exists$ formulas is decidable when the assumptions are  $\exists\forall$ formulas).
+
+We will assume certain (universal) properties on our functions (that are naturally translated to assumptions on the new binary relations), that will allow us to get rid of $TOT$.
+
+\begin{notation}
+Given a formula $\psi$ and a formula $P(x)$ (with one free variable $x$),
+$\psi_{P(x)}$ denotes the relativization (=restriction) of $\psi$ to $P(x)$.
+\end{notation}
+
+\begin{proposition}
+\label{function_elimination_proposition}
+Suppose that there is an existential formula $P(x)$ (over $\Sigma$) such that the following hold:
+\begin{enumerate}
+\item $ PF , TOT , \Gamma\vdash \forall x. P(x)$.
+\item $PF , \Gamma \vdash TOT^f_{P(x)}$ (that is $ PF ,\Gamma \vdash \forall x. \left( P(x) \to \exists y. \left(P(y) \land R_f(x,y)\right)\right)$) for every function symbol $f\in{\cal F}$.
+\item $PF, \Gamma \vdash P(c)$ for every constant symbol $c$.
+\item $PF, \Gamma \vdash \exists x. P(x)$
+(this follows from the previous item, provided that there is at least one constant symbol).
+\end{enumerate}
+Then $PF, TOT, \Gamma \vd \fe$ iff
+$PF, \Gamma \vd \fe_{P(x)}$.
+\end{proposition}
+
+Note that if $\fe$ is $\forall\exists$ and $P(x)$ is existential, then $\fe_{P(x)}$ is $\forall\exists$. Since $PF$ and $\Gamma$ are universal, it is decidable whether $PF, \Gamma\vd \fe_{P(x)}$ or not. This way we can decide on $PF, TOT, \Gamma \vd \fe$.
+
+\begin{proof}
+We denote by $M_{P(x)}$ the substructure of a first-order structure $M$ obtained restricting the domain of $M$ to all elements that satisfy $P(x)$ (assuming a relational vocabulary and ${M \models \exists x. P(x)} $). Note that $M_{P(x)} \models \psi$ iff $M \models \psi_{P(x)}$ for every formula $\psi$ and structure $M$ such that $M \models P(c)$ for every constant symbol $c$ and $M \models \exists x. P(x) $.
+
+Suppose that $PF, TOT, \Gamma \vd \fe$.
+Let $M$ be a model of $PF$ and $\Gamma$.
+Property $2$ ensures that $M \models TOT_{P(x)}$.
+By properties $3$ and $4$, we also have $M \models P(c)$
+for every constant symbol $c$, and $M \models \exists x. P(x)$.
+Hence $M_{P(x)} \models TOT$.
+Since $PF$ and $\Gamma$ are universal, we also have ${M_{P(x)} \models PF}$ and ${M_{P(x)} \models \Gamma}$.
+It follows that $M_{P(x)} \models \fe$, and so $M \models \fe_{P(x)}$.
+
+For the converse, suppose that $PF, \Gamma \vd \fe_{P(x)}$.
+Let $M$ be a model of $PF$, $TOT$ and $\Gamma$.
+Hence, $M \models \fe_{P(x)}$.
+In addition, properties $3-4$ ensure that 
+$M \models P(c)$ for every constant symbol $c$, 
+and  $M \models \exists x. P(x)$.
+This implies that $M_{P(x)} \models \fe$.
+Property $1$ ensures that $M \models \forall x. P(x)$, and hence $M_{P(x)}=M$.
+It follows that $M \models \fe$.
+\end{proof}
+
+\begin{example}
+\label{idempotent}
+Suppose that we have exactly one function symbol $f$ and one constant symbol $null$,
+and $\Gamma$ implies $R_f(null,null) \land \forall x, y. R_f(x,y) \to R_f (y,y)$
+(i.e., $f(null)=null$ and $f$ is idempotent).
+We can choose ${P(x)=\exists z. R_f (x,z)}$.
+Then, $\forall x. P(x)= TOT$, and thus property $1$ obviously holds.
+Property $2$ also holds:
+$\forall x, y. R_f(x,y) \to R_f (y,y) \vdash  \forall x. \left( (\exists z. R_f (x,z)) \to \exists y. \left((\exists z. R_f (y,z)) \land R_f(x,y)\right)\right)$.
+Properties $3-4$ clearly hold as well.
+\end{example}
+
+The following corollary of \Cref{function_elimination_proposition} is particularly useful.
+
+\begin{notation}
+Given a composition $f\circ g$ of function symbols in $\Sigma_{\cal F}$ and variables $x,y,z$, $R_{f \circ g}(x,y,z)$ is a syntactic sugar for the formula (over $\Sigma$) $R_g(x,y) \land R_f(y,z)$. Similarly, 
+given a composition sequence $f_m \circtil f_1$ and variables $x_0 \til x_m$,
+$R_{f_m\circtil f_1}(x_0\til x_m)$ denotes the formula
+$\bigwedge_{1\leq i\leq m} R_{f_i}(x_{i-1},x_i)$.
+\end{notation}
+
+\begin{corollary}
+\label{function_elimination_corollary}
+Let $F_1 \til F_n$
+be $n$ composition sequences of function symbols from ${\cal F}$ of lengths $m_1 \til m_n$ (respectively).
+For every $1\leq k\leq n$ and variable $x$,
+let $P_{F_k}(x)$ denote the formula $\exists y_1 \til y_{m_k}. R_{F_k}(x,y_1 \til y_{m_k})$.
+For every  variable $x$,
+let $P_{F}(x)$ denote the conjunction  $\bigwedge_{1\leq k\leq n} P_{F_k}(x)$.
+Suppose that each of the following formulas follows from $PF$ and $\Gamma$:
+\begin{enumerate}
+\item $\forall x. \exists  x^1_1 \til x^{m_1}_1 \til x^1_n \til x^{m_n}_n. \bigwedge_{1\leq k\leq n} R_{F_k}(x,x^1_k  \til x^{m_k}_k) \to \bigwedge_{1 \leq i \leq n; 1\leq j \leq m_i} P_{F}(x^j_i)$.
+\item 
+For every function symbol $f\in {\cal F}$: \\
+$\forall x. \exists  x^1_1 \til x^{m_1}_1 \til x^1_n \til x^{m_n}_n. \bigwedge_{1\leq k\leq n} R_{F_k}(x,x^1_k  \til x^{m_k}_k) \to \bigvee_{1 \leq i \leq n; 1\leq j \leq m_i} R_f(x,x^j_i)$.
+\item 
+For every constant symbol $c$:
+$P_{F}(c)$.
+\item $\exists x. P_{F}(x)$ (this follows from the previous item, provided that there is at least one constant symbol).
+\end{enumerate}
+Then $PF, TOT, \Gamma \vd \fe$ iff $PF, \Gamma \vd \fe_{P_{F}(x)}$.
+\end{corollary}
+
+\begin{proof}
+Use \Cref{function_elimination_proposition} with $P(x)=P_{F}(x)$.
+\end{proof}
+
+\begin{example}
+Suppose that we have exactly one function symbol $f$ and one constant symbol $null$,
+and $\Gamma$ implies $R_f(null,null) \land  \forall x, y,z. R_f(x,y) \land R_f(y,z) \to R_f (z,y)$ (i.e., $f$ satisfies $f(f(f(x)))=f(x)$).
+Then, \Cref{function_elimination_corollary} can be used with
+$n=1$ and $F_1=f \circ f$.
+\end{example}
+
+\begin{example}
+\label{cycles}
+Suppose that we have two function symbols $f$ and $g$ and one constant symbol $null$, and $\Gamma$ implies the following:
+\begin{itemize}
+\item $\forall x, y. R_f(x,y) \to R_f (y,y)$
+\item $\forall x, y. R_g(x,y) \to R_g (y,y)$
+\item $\forall x, y,z. R_f(x,y) \land R_g (x,z) \to R_g (y,z) $
+\item $\forall x, y,z. R_f(x,y) \land R_g (x,z) \to R_f (z,y) $
+\item $R_f(null,null) \land R_g(null,null)$
+\end{itemize}
+In this case, \Cref{function_elimination_corollary} can be used with
+$n=2$, $F_1=f$ and $F_2=g$.
+\end{example}
+
+\begin{example}
+Suppose that we have two function symbols $f$ and $g$ and one constant symbol $null$, and $\Gamma$ implies the following:
+\begin{itemize}
+\item $\forall x, y. R_f(x,y) \to R_f (y,y)$
+\item $\forall x, y. R_g(x,y) \to R_g (y,y)$
+\item $\forall x,y,z. R_g(x,y) \land R_f(y,z) \to  R_g(z,null) \lor R_g(z,z)$
+\item $\forall x,y,z. R_f(x,y) \land R_g(y,z) \to  R_f(z,null) \lor R_f(z,z)$
+\item $R_f(null,null) \land R_g(null,null)$
+\end{itemize}
+In this case, \Cref{function_elimination_corollary} can be used with
+$n=2$, $F_1=f \circ g$ and $F_2=g \circ f$.
+\end{example}
+
+
+%Finally, the next proposition is useful 
+
+%\begin{proposition}
+%Let $F_1 \til F_n$
+%be $n$ composition sequences of function symbols from ${\cal F}$
+%that satisfy the conditions of \Cref{function_elimination_corollary}.
+%Suppose that some binary relation 
+%\end{proposition}
+
+
+\section*{Questions}
+\begin{enumerate}
+\item Is it known? perhaps there is a simpler way to obtain a similar result?
+\item Is it interesting? useful? so far, we had idempotent functions (Example \ref{idempotent}) and the case of Example \ref{cycles} for dealing with cycles.
+\item Can it be extended? in particular, for binary function symbols?
+
+E.g. if we know $f(x,y)=f(y,x)$ and $f(x,f(y,z))=f(x,y) \lor f(x,f(y,z))=f(x,z)$ like the case of ``lowest common ancestor".
+
+A trivial example is when we know $f(x,y)\in \{x,y\}$ (like $\min$ or $\max$ functions), and in this case we can simply have
+$\forall x,y. R_f(x,y,x) \lor R_f(x,y,y)$ instead of $\forall x,y. \exists z. R_f(x,y,z)$.)
+
+\end{enumerate}
+
+\end{document}

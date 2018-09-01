@@ -1,0 +1,58 @@
+# @flags --no-preds-dll
+
+#
+#  h
+#   \    p     p     p
+#    [ ]-->[ ]-->[ ]-->[ ]
+#   n |  p
+#    [ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#   n |  p     p
+#    [ ]-->[ ]-->[ ]
+#
+
+# flatten(h)
+#	i := h;
+#	j := null;
+#	while $i != null$ {$I1$} (
+#		k := i;
+#		while $k != null$ {$I2$} (
+#			j := k;
+#			k := k.p
+#		) ;
+#		i := i.n; j.p := null; j.p := i
+#	)
+ 
+(h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(k0 : V) -> (k : V)
+
+(C : V -> bool)
+
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+(p*0 : V * V -> bool) -> (p* : V * V -> bool)
+(_n* : V * V -> bool)
+
+dtca(p*)
+dtca(p*0)
+
+init := i = h & j = null & k = h &
+        forall u v (n*(h,u) & p*(u,v) -> u = v)
+
+cond := i != null
+loopBody := program([
+  t := i.n ;
+  if $C(i)$ then (
+    if $j != null$ then ( j.n := null ; k.p := i ) else skip ;
+    k := i
+  )
+  else skip;
+  j := i ;
+  i := t
+ ])
+
+post := true
+bad  := ~ite(cond, wp_ae(loopBody,true), post)
+

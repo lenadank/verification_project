@@ -1,0 +1,47 @@
+#
+# Swaps the first two elements of a list (if the list has at least two elements)
+#
+
+# @uses dtca
+# @uses hoare
+# @uses base
+
+h : V
+i : V
+j : V
+i' : V
+j' : V
+n* : V * V -> bool
+_n*: V * V -> bool
+n*': V * V -> bool
+
+_h : V
+_hnext : V
+
+
+swap := program([
+    if $h != null$ then (
+       i := h.n ;
+       if $i != null$ then (
+          j := i.n ;
+          h.n := j ;
+          i.n := h ;
+          h := i
+       )
+      else skip
+    )
+    else skip
+ ])
+
+dtca(n*)
+
+_n+_(u,v) := n+_(_n*, u, v)
+
+P := eqrel(_n*, n*) & _h = h & ntot_(h,_hnext)
+     
+Q := forall u (_n*(_h,u) <-> n*(h,u)) &
+     forall u v (_n+_(_h, u) & _n+_(_h, v) -> (n*(u,v) <-> _n*(u,v)) )
+
+
+
+verify(P, swap, Q)

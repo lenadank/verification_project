@@ -1,0 +1,25 @@
+
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+(x : V)
+(h : V)
+(null : V)
+(n* : V * V -> bool)
+
+init     := i = h & j = null
+loopBody := program([ j := i; i := i.n ])
+cond     := i != x & i != null
+post     := ite(n*(h,x), i = x, i = null) & (j != null -> ntot_(j, i))
+bad      := ~cond & ~post
+
+
+# Output is:
+#
+# And(Not(And(j == h, Not(nhi))),
+#    Not(And(Not(njnull), i == null)),
+#    Not(And(j != null, i == h)),
+#    Not(And(Not(n*(j, i)), j != null, null != i)),
+#    Not(And(Not(n*(i, x)), n*(h, x))),
+#    Not(And(i != h, Not(n*(h, j)))),
+#    Not(And(i != h, Not(njx), i == x)))
+#
