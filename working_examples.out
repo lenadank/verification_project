@@ -1,0 +1,254 @@
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-concat.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-concat.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-create.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is safisfied ----
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-delete-at.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-deleteAll.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+***  unable to find relaxed trace for depth=2
+************************************************************
+ 3 
+***  unable to find relaxed trace for depth=3
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-filter.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-insert-at.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-insert.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-merge.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-reverse.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+***  unable to find relaxed trace for depth=2
+************************************************************
+ 3 
+***  unable to find relaxed trace for depth=3
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-split.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-sorted-insert.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-sorted-merge.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-bubble-sort.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-insertion-sort.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is unsafisfied 
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-nested-flatten.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is unsafisfied 
+************************************************************
+ 3 
+************************************************************
+***  found relaxed trace for depth=3, bad is safisfied ----
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-nested-split.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is safisfied ----
+************************************************************
+* BENCHMARK
+Sindarin.PDR-Universal/benchmarks/sll-shared-delete.imp
+running program until depth = 3
+ 1 
+************************************************************
+***  found relaxed trace for depth=1, bad is unsafisfied 
+************************************************************
+ 2 
+************************************************************
+***  found relaxed trace for depth=2, bad is safisfied ----
+************************************************************

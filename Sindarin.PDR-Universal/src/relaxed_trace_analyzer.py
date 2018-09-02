@@ -848,9 +848,10 @@ def load_data():
 if __name__ == '__main__':
 
     import argparse
-
+    print_loaded_info = False
     a = argparse.ArgumentParser()
     a.add_argument('filename', type=str, nargs='?', default=argparse.SUPPRESS)
+    a.add_argument('-n', type=int, help="num of iterations for the relaxed trace search", default=3)
     a.add_argument('-u', action='store_true', help="universal invariant inference")
     a.add_argument('-a', action='store_true', help="(experimental) use alpha-from-below")
     a.add_argument('-p', action='store_true', help="(experimental) use partial models, not sound")
@@ -908,11 +909,12 @@ if __name__ == '__main__':
     
     axioms = list(vocab << syn.first_pass(program))
 
-    print "* PREDICATES"
-    print vocab.preds
+    if print_loaded_info:
+        print "* PREDICATES"
+        print vocab.preds
 
-    print "* CONSTANTS"
-    print vocab.consts
+        print "* CONSTANTS"
+        print vocab.consts
 
     # Extract loop from program (use cond := ... and loopBody := ... definitions as fallback)
     loop = MainLoop.locate_loop(syn.first_pass)
@@ -926,8 +928,8 @@ if __name__ == '__main__':
     cond0 = vocab.to_past(cond)
 
     ##############################################################
-    use_extra_properties = not args.u
-
+    #use_extra_properties = not args.u
+    use_extra_properties = False
     if use_extra_properties:
         extra = generate_n_properties(syn, vocab.consts, vocab)
 
@@ -977,7 +979,7 @@ if __name__ == '__main__':
     background = And(generate_gamma(syn, vocab.preds_flat, decls),
                      *extra_axioms)
 
-    globals = [ decls[x] for x in vocab.globals if t.sorts.ary(x, 1)] #   @ReservedAssignment
+    globals = [ decls[x] for x in vocab.globals if t.sorts.ary(x, 0)] #   @ReservedAssignment
     locals  = [ (decls[x0], decls[x]) for x0,x in vocab.locals] # @ReservedAssignment
 
     if args.u:
@@ -989,11 +991,16 @@ if __name__ == '__main__':
             print "*** Generalize enum values"
         args.o = False # universals currently not supported in opt version
 
-    print "* GLOBALS"
-    print globals
+    if print_loaded_info:
+        print "* GLOBALS"
+        print globals
 
-    print "* LOCALS"
-    print locals
+        print "* LOCALS"
+        print locals
 
-    r_t_analyzer = Relaxed_Trace_Analyzer(init, rho, bad, background, globals, locals, preds,1)
-    r_t_analyzer.run()
+    print ("running program until depth = %d" % args.n)
+    for i in xrange(1, args.n+1):
+        print (""" %d """ %i)
+        r_t_analyzer = Relaxed_Trace_Analyzer(init, rho, bad, background, globals, locals, preds,i)
+        if r_t_analyzer.run() == RELAX_TRACE_AND_BAD:
+            break

@@ -1,0 +1,36 @@
+
+(null : V)
+(n*0 : V * V -> bool) -> (n* : V * V -> bool)
+
+(h0 : V) -> (h : V)
+(i0 : V) -> (i : V)
+(j0 : V) -> (j : V)
+
+(OK : V -> bool)
+#(x : V)
+#(y : V)
+
+
+init     :=  i = h & j = null
+#             n*(h,x) & ~OK(x)
+#             n*(x,y) & ~OK(y)
+
+cond     :=  i != null
+loopBody :=  program([
+                if $~OK(i)$ then
+                   if $i = h$ then
+                      h := i.n
+                   else
+                      ( t := i.n; j.n := null; j.n := z)
+                else
+# the bug is here, should be j = i
+                   j := i.n;
+                i := i.n
+             ])
+
+post     :=  forall z (h != null & n*(h,z) -> OK(z))
+#post     :=  n*(h,x) & forall z (h != null & n*(h,z) -> OK(z))
+#post     :=  n*(x,y) & forall z (h != null & n*(h,z) -> OK(z))
+
+bad      :=  ~cond & ~post
+#bad      :=  ~ite(cond, wp_ae(loopBody,true), post)

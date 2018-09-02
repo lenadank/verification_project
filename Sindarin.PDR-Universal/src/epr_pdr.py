@@ -622,7 +622,7 @@ class TwoVocabulary(object):
     def preds(self):
         return [z for z in set(x for _,x in self.locals) | set(self.globals)
                 if t.sorts.returns(z, 'bool') or t.sorts.returns(z, '')]
-        
+
     @property
     def preds_flat(self):
         return [z for z in self.symbols_flat
