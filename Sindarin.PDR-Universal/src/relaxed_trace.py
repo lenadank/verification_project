@@ -6,7 +6,7 @@ RELAX_TRACE_AND_BAD = 1
 RELAX_TRACE_NOT_BAD = 2
 NO_RELAX_TRACE = 3
 
-
+VAR_VERSION_SEP = "_"
 DEBUG=False
 
 class Relaxed_Trace_Analyzer():
@@ -50,7 +50,7 @@ class Relaxed_Trace_Analyzer():
         var_sort = None
         for item in self.locals:
             var = str(item[1])
-            const_str = var + "_" + (" " + var + "_").join(indices)
+            const_str = var + VAR_VERSION_SEP + (" " + var + VAR_VERSION_SEP).join(indices)
             if is_const(item[1]):
                 if DEBUG:
                     print ("Const: %s (%s)" % (str(item[1]), item[1].sort()))
@@ -106,7 +106,7 @@ class Relaxed_Trace_Analyzer():
     def get_rebased_name(self, var, phase_num):
         # some times n_star is a global mathod, so it doesn't need to rebase, but we do it in the active function so this case need to be taked care of
         if var is self.n_star:
-            return var if var not in self.var_dict else self.var_dict[str(var)][phase_num]
+            return var if str(var) not in self.var_dict else self.var_dict[str(var)][phase_num]
         else:
             return self.var_dict[str(var)][phase_num]
 
@@ -225,6 +225,7 @@ class Relaxed_Trace_Analyzer():
             if sat == phi_and_bad_sat:
                 print("***  found relaxed trace for depth=%d, bad is safisfied ----" % self.N)
                 #print(phi_and_bad_solver.model())
+                self.print_model(phi_solver.model())
                 ret_val = RELAX_TRACE_AND_BAD
             else:
                 print("***  found relaxed trace for depth=%d, bad is unsafisfied " % self.N)
@@ -240,6 +241,29 @@ class Relaxed_Trace_Analyzer():
             ret_val = NO_RELAX_TRACE
         print("*" * 60)
         return ret_val
+
+    def print_model(self, model):
+        keys_to_string_map = dict()
+        for d in model:
+            keys_to_string_map[d.name()] = d
+        print("globals:")
+        for g in self.globals:
+            val = keys_to_string_map.get(str(g), None)
+            if not val is None:
+                print("\t%s %s" % (str(g), str(model[val])))
+        print("locals:")
+        #starting with 0 (init) and then go over the odd indices
+        indices = [0]+ range(1, 2*self.N, 2)
+        for i in indices:
+            if i == 0:
+                print("initial state:")
+            else:
+                print("iteration %d" % ((i+1)/2))
+            for g in self.var_dict:
+                iteration_version = self.get_rebased_name(g, i)
+                val = keys_to_string_map.get(str(iteration_version), None)
+                if not val is None:
+                    print("\t%s %s" % (str(iteration_version), str(model[val])))
 
 if __name__ == '__main__':
     A = IntSort()
