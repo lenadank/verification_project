@@ -1001,6 +1001,6 @@ if __name__ == '__main__':
     print ("running program until depth = %d" % args.n)
     for i in xrange(1, args.n+1):
         print (""" %d """ %i)
-        r_t_analyzer = Relaxed_Trace_Analyzer(init, rho, bad, background, globals, locals, preds,i)
+        r_t_analyzer = Relaxed_Trace_Analyzer(init, rho, bad, background, globals, locals, preds, vocab.consts, i)
         if r_t_analyzer.run() == RELAX_TRACE_AND_BAD:
             break

@@ -10,7 +10,7 @@ VAR_VERSION_SEP = "_"
 DEBUG=False
 
 class Relaxed_Trace_Analyzer():
-    def __init__(self, init, rho, bad, background, globals, locals, relations, N):
+    def __init__(self, init, rho, bad, background, globals, locals, relations, constants, N):
         self.init = init;
         self.rho = rho
         self.bad = bad
@@ -28,6 +28,7 @@ class Relaxed_Trace_Analyzer():
         self.rebased_delta = None
         self.rebased_bad = bad
         self.rebased_background = background
+        self.constants = constants
         self.preprocess()
 
     def preprocess(self):
@@ -42,7 +43,6 @@ class Relaxed_Trace_Analyzer():
                 self.n_star_is_global = False
 
         assert not self.n_star is None, "n* is not defined as a function"
-
         max_arity = 1
         indices = [str(i) for i in xrange(2 * self.N + 1)]
         all_variables = list()
@@ -64,6 +64,12 @@ class Relaxed_Trace_Analyzer():
                     var_sort = sorts[0]
                 self.var_dict[var] = self.Functions(const_str, sorts)
                 max_arity = max(max_arity, item[1].arity())
+
+        #add all global predicates/constant to globals:
+        for item in self.relations:
+            if not str(item) in self.var_dict:
+                if not item in self.globals:
+                    self.globals.append(item)
 
         for item in self.globals:
             if is_func_decl(item):
@@ -106,7 +112,7 @@ class Relaxed_Trace_Analyzer():
     def get_rebased_name(self, var, phase_num):
         # some times n_star is a global mathod, so it doesn't need to rebase, but we do it in the active function so this case need to be taked care of
         if var is self.n_star:
-            return var if str(var) not in self.var_dict else self.var_dict[str(var)][phase_num]
+            return var if var not in self.var_dict else self.var_dict[str(var)][phase_num]
         else:
             return self.var_dict[str(var)][phase_num]
 
@@ -224,7 +230,19 @@ class Relaxed_Trace_Analyzer():
             phi_and_bad_sat = phi_and_bad_solver.check()
             if sat == phi_and_bad_sat:
                 print("***  found relaxed trace for depth=%d, bad is safisfied ----" % self.N)
-                #print(phi_and_bad_solver.model())
+                #remove thi
+                OK = self.relations[1]
+                z = self.spare_variables[0]
+                h = self.var_dict["h"][3]
+                n = self.get_rebased_name(self.n_star, 3)
+                tmp_formula= ForAll(z, Implies(n(h, z), OK(z)))
+                sol = Solver()
+                sol.add(*elements_for_phi)
+                sol.add(tmp_formula)
+                sol.check()
+                self.print_model(sol.model())
+                exit()
+                ##########
                 self.print_model(phi_solver.model())
                 ret_val = RELAX_TRACE_AND_BAD
             else:
