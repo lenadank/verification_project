@@ -230,19 +230,6 @@ class Relaxed_Trace_Analyzer():
             phi_and_bad_sat = phi_and_bad_solver.check()
             if sat == phi_and_bad_sat:
                 print("***  found relaxed trace for depth=%d, bad is safisfied ----" % self.N)
-                #remove thi
-                OK = self.relations[1]
-                z = self.spare_variables[0]
-                h = self.var_dict["h"][3]
-                n = self.get_rebased_name(self.n_star, 3)
-                tmp_formula= ForAll(z, Implies(n(h, z), OK(z)))
-                sol = Solver()
-                sol.add(*elements_for_phi)
-                sol.add(tmp_formula)
-                sol.check()
-                self.print_model(sol.model())
-                exit()
-                ##########
                 self.print_model(phi_solver.model())
                 ret_val = RELAX_TRACE_AND_BAD
             else:
