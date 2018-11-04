@@ -66,9 +66,42 @@ class Z3Renaming(object):
                     except KeyError: pass
                     return r(chs)
             return term
-                       
-        
-        
+
+
+class Z3ActiveBoundedVariables(object):
+    def __init__(self, curr_active_func):
+        self.curr_active_func = curr_active_func
+
+    def __call__(self, term):
+        if is_func_decl(term):
+            return term
+        if is_quantifier(term):
+            vars0 = [Const(term.var_name(i), term.var_sort(i)) for i in xrange(term.num_vars())]
+            #print("bounded variables: ", vars0)
+            body = self(term.body())
+            all_active = And([self.curr_active_func(x) for x in vars0])
+            if term.is_forall():
+                #ForAll(x, body) -> ForAll(x, active(x) -> body)
+                return ForAll(vars0, Implies(all_active, body))
+                #return ForAll(vars0, body)
+            else:  # assume 'exists'
+                #Exist(x, body) -> exist(x, active(x) ^ body)
+                return Exists(vars0, And(all_active,body))
+        else:
+            chs = [self(ch) for ch in term.children()]
+            if len(chs) == 0:
+                return term
+            else:
+                if is_and(term):
+                    return And(chs)
+                elif is_or(term):
+                    return Or(chs)
+                else:
+                    r = term.decl()
+                    return r(chs)
+            return term
+
+
 class Z3TwoVocabulary(list, SimplisticPromoteMixIn):
     """
     Hosts a list of tuples of the form [(a0,a), (b0,b), ...]
