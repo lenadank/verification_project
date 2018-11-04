@@ -343,22 +343,14 @@ class Relaxed_Trace_Analyzer():
         if DEBUG:
             print("bad", self.get_var_versions(self.rebased_bad))
         phi_solver.add(*elements_for_phi)
+        phi_solver.add(self.rebased_bad)
         phi_sat = phi_solver.check()
+        print("*" * 60)
         if sat == phi_sat:
-            #print(phi_solver.model())
-            print("*" * 60)
-            phi_and_bad_solver = Solver()
-            phi_and_bad_solver.add(*elements_for_phi)
-            phi_and_bad_solver.add(self.rebased_bad)
-            phi_and_bad_sat = phi_and_bad_solver.check()
-            if sat == phi_and_bad_sat:
-                print("***  found relaxed trace for depth=%d, bad is safisfied ***" % self.N)
-                #self.print_model(phi_and_bad_solver.model())
-                print(phi_and_bad_solver.model().sexpr())
-                ret_val = RELAX_TRACE_AND_BAD
-            else:
-                print("***  found relaxed trace for depth=%d, bad is unsafisfied ***" % self.N)
-                ret_val = RELAX_TRACE_NOT_BAD
+            print("***  found relaxed trace for depth=%d ***" % self.N)
+            # self.print_model(phi_and_bad_solver.model())
+            print(phi_solver.model().sexpr())
+            ret_val = RELAX_TRACE_AND_BAD
         else:
             print("***  unable to find relaxed trace for depth=%d" % self.N)
             ret_val = NO_RELAX_TRACE
