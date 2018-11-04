@@ -24,3 +24,4 @@ python relaxed_trace_analyzer.py Sindarin.PDR-Universal/benchmarks/sll-filter.im
 
 [1] Karbyshev et al., *Property-Directed Inference of Universal Invariants or Proving Their Absence*,
     in Computer Aided Verification (CAV) 2015.
+
