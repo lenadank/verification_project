@@ -6,7 +6,7 @@ h : V
 (i0 : V) -> (i : V)
 (j0 : V) -> (j : V)
 (k0 : V) -> (k : V)
-
+(n* : V * V -> bool)
 (ms0 : V) -> (ms : V)
 (mt0 : V) -> (mt : V)
 

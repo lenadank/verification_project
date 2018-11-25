@@ -7,7 +7,7 @@
 (y0 : V) -> (y : V)
 ms : V
 mt : V
-
+(n* : V * V -> bool)
 dtcc1(k*,ms,mt)
 
 init     :=  on_cycle(h) & x = h & y = null

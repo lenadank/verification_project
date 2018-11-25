@@ -16,7 +16,7 @@
 
 (ms0 : V) -> (ms : V)
 (mt0 : V) -> (mt : V)
-
+(n* : V * V -> bool)
 
 dtcc1(k*,ms,mt)
 dtcc1(k*0,ms0,mt0)

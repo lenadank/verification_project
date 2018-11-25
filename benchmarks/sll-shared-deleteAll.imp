@@ -32,6 +32,6 @@ loopBody :=  program([
              ])
 
 post     :=  ntot_(h,null) & ptot_(h,null)
-bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
-#bad         :=  ~cond & ~post
+#bad         :=  ~ite(cond, wp_ae(loopBody,true), post)
+bad         :=  ~cond & ~post
 

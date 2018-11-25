@@ -6,7 +6,7 @@ h : V
 (i0 : V) -> (i : V)
 ms : V
 mt : V
-
+(n* : V * V -> bool)
 dtcc1(k*,ms,mt)
 
 init := h != null & cntot_(h,i)

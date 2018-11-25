@@ -3,7 +3,7 @@
 k* : V * V -> bool
 ms : V
 mt : V
-
+(n* : V * V -> bool)
 h : V
 e : V
 (i0 : V) -> (i : V)

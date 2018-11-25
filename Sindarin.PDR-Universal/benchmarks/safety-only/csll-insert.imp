@@ -8,7 +8,7 @@ h : V
 e : V
 (i0 : V) -> (i : V)
 (j0 : V) -> (j : V)
-
+(n* : V * V -> bool)
 R : V * V -> bool
 
 dtcc1(k*,ms,mt)

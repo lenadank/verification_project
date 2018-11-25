@@ -12,7 +12,7 @@ h : V
 
 dtcc1(k*,ms,mt)
 dtcc1(k*0,ms0,mt0)
-
+(n* : V * V -> bool)
 
 init     :=  on_cycle(h) & i = h & j = null
 

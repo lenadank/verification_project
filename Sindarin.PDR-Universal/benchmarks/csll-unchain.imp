@@ -16,7 +16,7 @@
 
 (ms0 : V) -> (ms : V)
 (mt0 : V) -> (mt : V)
-
+(n* : V * V -> bool)
 # ghost structures:
 _k* : V * V -> bool
 _ms : V
