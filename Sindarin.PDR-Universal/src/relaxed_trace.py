@@ -1,4 +1,5 @@
 from z3 import *
+import itertools
 
 from z3support.vocabulary import Z3Alphabet, Z3Renaming, Z3ActiveBoundedVariables
 
@@ -348,8 +349,8 @@ class Relaxed_Trace_Analyzer():
         print("*" * 60)
         if sat == phi_sat:
             print("***  found relaxed trace for depth=%d ***" % self.N)
-            # self.print_model(phi_and_bad_solver.model())
-            print(phi_solver.model().sexpr())
+            self.print_model(phi_solver.model())
+            #print(phi_solver.model().sexpr())
             ret_val = RELAX_TRACE_AND_BAD
         else:
             print("***  unable to find relaxed trace for depth=%d" % self.N)
@@ -362,41 +363,63 @@ class Relaxed_Trace_Analyzer():
 
 
 
-
-
+    def print_func(selfs, values, func, func_name_no_version, model, prefix = ""):
+        print(prefix + func_name_no_version + ":")
+        all_val_combination = [values[func.domain(i)] for i in range(func.arity())]
+        for element in itertools.product(*all_val_combination):
+            print("%s\t%s: %s" % (prefix, element, model.eval(func(*element))))
 
     def print_model(self, model):
+        #print n
+        sorts = model.sorts()
+        values = dict()
+        for sort in sorts:
+            values[sort] = model.get_universe(sort)
+
         keys_to_string_map = dict()
         for d in model:
             keys_to_string_map[d.name()] = d
-        print("globals:")
+        print("++++++++++++++++++++++++")
+        print("+++++++ globals: +++++++")
+        print("++++++++++++++++++++++++")
+
         for g in self.globals:
             val = keys_to_string_map.get(str(g), None)
             if not val is None:
-                print("\t%s: %s" % (str(g), str(model[val])))
-        print("locals:")
+                if is_const(g):
+                    print("\t%s: %s" % (str(g), str(model[val])))
+                else:
+                    self.print_func(values, g, str(g), model, "\t")
+
+        print("++++++++++++++++++++++++")
+        print("++++++++ locals: ++++++++")
+        print("++++++++++++++++++++++++")
         #starting with 0 (init) and then go over the odd indices
         indices = [0]+ range(1, 2*self.N, 2)
         for i in indices:
             if i == 0:
-                print("initial state:")
+                print("----------------------")
+                print("--  initial state:---")
+                print("----------------------")
             else:
-                print("iteration %d" % ((i+1)/2))
+                print("----------------------")
+                print("-- sigma %d --" % ((i+1)/2))
+                print("----------------------")
             local_vars = dict()
             local_rels = dict()
             for g in self.var_dict:
                 iteration_version = self.get_rebased_name(g, i)
                 val = keys_to_string_map.get(str(iteration_version), None)
                 if not val is None:
-                    if is_const(val):
-                        local_vars[str(iteration_version).split(VAR_VERSION_SEP)[0]] = model[val]
+                    if is_const(iteration_version):
+                        local_vars[str(g)] = model[val]
                     else:
-                        local_rels[str(iteration_version).split(VAR_VERSION_SEP)[0]] = model[val]
+                        local_rels[str(g)] = iteration_version
             for var in sorted(local_vars):
-                print("\t%s: %s" % (var, str(local_vars[var])))
+                print("\t%s:\t\t\t\t%s" % (var, str(local_vars[var])))
 
             for var in sorted(local_rels):
-                print("\t%s: %s" % (var, str(local_rels[var])))
+                self.print_func(values, local_rels[var], var, model, "\t")
 
 
 if __name__ == '__main__':
