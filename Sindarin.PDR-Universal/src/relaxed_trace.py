@@ -52,8 +52,8 @@ class Relaxed_Trace_Analyzer():
         #add active function
 
         self.active_func = Function("__active__", self.n_star.domain(0), self.n_star.range())
-        temp_prev_active = Function("__active0__", self.n_star.domain(0), self.n_star.range())
-        self.locals.append((temp_prev_active, self.active_func))
+        temp_next_active = Function("__active0__", self.n_star.domain(0), self.n_star.range())
+        self.locals.append((temp_next_active, self.active_func))
 
         assert not self.n_star is None, "n* is not defined as a function"
         max_arity = 1
@@ -61,22 +61,22 @@ class Relaxed_Trace_Analyzer():
         all_variables = list()
         all_variables.extend(self.globals)
         var_sort = None
-        for item in self.locals:
-            var = str(item[1])
+        for prev, curr in self.locals:
+            var = str(curr)
             const_str = var + VAR_VERSION_SEP + (" " + var + VAR_VERSION_SEP).join(indices)
-            if is_const(item[1]):
+            if is_const(curr):
                 if DEBUG:
-                    print ("Const: %s (%s)" % (str(item[1]), item[1].sort()))
-                self.var_dict[var] = Consts(const_str, item[1].sort())
-                all_variables.append(item[1])
-            elif is_func_decl(item[1]):
-                sorts = [item[1].domain(i) for i in range(item[1].arity())] + [item[1].range()]
+                    print ("Const: %s (%s)" % (str(curr), curr.sort()))
+                self.var_dict[var] = Consts(const_str, curr.sort())
+                all_variables.append(curr)
+            elif is_func_decl(curr):
+                sorts = [curr.domain(i) for i in range(curr.arity())] + [curr.range()]
                 if DEBUG:
-                    print ("Relation: %s (%s)" % (str(item[1]), str(sorts)))
+                    print ("Relation: %s (%s)" % (str(curr), str(sorts)))
                 if var_sort is None:
                     var_sort = sorts[0]
                 self.var_dict[var] = self.Functions(const_str, sorts)
-                max_arity = max(max_arity, item[1].arity())
+                max_arity = max(max_arity, curr.arity())
             self.local_name_to_var_dict[str(var)] = var
 
         #add all global predicates/constant to globals:
@@ -105,17 +105,17 @@ class Relaxed_Trace_Analyzer():
                 print("%s (%s)" % (str(z), z.sort()))
         self.rebased_init = self.init
         self.rebased_rho = self.rho
-        for (v0, v) in self.locals:
+        for (prev, curr) in self.locals:
             # replace v0 with v_0, replace v with v_1
             # rebase init to the _0 set of variables
-            self.rebased_init = Z3Renaming(Z3Alphabet([v]), Z3Alphabet([self.get_rebased_name(v, 0)]))(self.rebased_init)
-            self.rebased_rho = Z3Renaming(Z3Alphabet([v0]), Z3Alphabet([self.get_rebased_name(v, 0)]))(self.rebased_rho)
-            self.rebased_rho = Z3Renaming(Z3Alphabet([v]), Z3Alphabet([self.get_rebased_name(v, 1)]))(self.rebased_rho)
+            self.rebased_init = Z3Renaming(Z3Alphabet([curr]), Z3Alphabet([self.get_rebased_name(curr, 0)]))(self.rebased_init)
+            self.rebased_rho = Z3Renaming(Z3Alphabet([prev]), Z3Alphabet([self.get_rebased_name(curr, 0)]))(self.rebased_rho)
+            self.rebased_rho = Z3Renaming(Z3Alphabet([curr]), Z3Alphabet([self.get_rebased_name(curr, 1)]))(self.rebased_rho)
             #rebase bad to the last set of variables
-            self.rebased_bad = Z3Renaming(Z3Alphabet([v]), Z3Alphabet([self.get_rebased_name(v, LAST_PHASE_NUM)]))(self.rebased_bad)
+            self.rebased_bad = Z3Renaming(Z3Alphabet([curr]), Z3Alphabet([self.get_rebased_name(curr, LAST_PHASE_NUM)]))(self.rebased_bad)
             #rebase background, replace v0 with v_0, replace v with v_1
-            self.rebased_background = Z3Renaming(Z3Alphabet([v0]), Z3Alphabet([self.get_rebased_name(v, 0)]))(self.rebased_background)
-            self.rebased_background = Z3Renaming(Z3Alphabet([v]), Z3Alphabet([self.get_rebased_name(v, 1)]))(self.rebased_background)
+            self.rebased_background = Z3Renaming(Z3Alphabet([curr]), Z3Alphabet([self.get_rebased_name(curr, 1)]))(self.rebased_background)
+            self.rebased_background = Z3Renaming(Z3Alphabet([prev]), Z3Alphabet([self.get_rebased_name(curr, 0)]))(self.rebased_background)
 
         self.rebased_delta = self.delta(2)
         self.rebased_active_for_rho = self.active_for_rho(1)
@@ -194,12 +194,12 @@ class Relaxed_Trace_Analyzer():
 
         curr_active_func = self.get_rebased_name(self.active_func, phase_num)
 
-        for var in self.locals:
+        for prev, curr in self.locals:
             #ignore active in the equations
-            if str(var[1]) == str(self.active_func):
+            if str(curr) == str(self.active_func):
                 continue
-            past_var = self.get_rebased_name(var[1], phase_num - 1)
-            present_var = self.get_rebased_name(var[1], phase_num)
+            past_var = self.get_rebased_name(curr, phase_num - 1)
+            present_var = self.get_rebased_name(curr, phase_num)
             past_present_tuples.append((past_var, present_var))
         for var in self.globals:
             if is_func_decl(var):
@@ -253,10 +253,10 @@ class Relaxed_Trace_Analyzer():
             return formula
         pasts = []
         presents = []
-        for (v0, v) in self.locals:
+        for (next, curr) in self.locals:
             for index_pair in index_pairs:
-                past = self.get_rebased_name(v, index_pair[0])
-                present = self.get_rebased_name(v, index_pair[1])
+                past = self.get_rebased_name(curr, index_pair[0])
+                present = self.get_rebased_name(curr, index_pair[1])
                 pasts.append(past)
                 presents.append(present)
         formula = Z3Renaming(Z3Alphabet(pasts), Z3Alphabet(presents))(formula)
@@ -304,10 +304,10 @@ class Relaxed_Trace_Analyzer():
     def run_phi_delta(self):
         phi_solver = Solver()
         elements_for_phi = list()
-        elements_for_phi.append(self.rebased_background) # (0,1)
         elements_for_phi.append(self.rebased_init)
-        elements_for_phi.append(self.rebased_rho) # (0,1)
+        elements_for_phi.append(self.rebased_background) # (0,1)
         elements_for_phi.append(self.rebased_active_for_rho) #(0,1)
+        elements_for_phi.append(self.rebased_rho) # (0,1)
         elements_for_phi.append(self.rebased_delta) # (1,2)
         elements_for_phi.append(self.rebased_active_for_delta) # (1,2)
         new_active_for_rho = self.rebased_active_for_rho #(0,1)
@@ -371,14 +371,21 @@ class Relaxed_Trace_Analyzer():
 
     def print_model(self, model):
         #print n
+
         sorts = model.sorts()
         values = dict()
+        print("++++++++++++++++++++++++")
+        print("+++ model variables: +++")
+        print("++++++++++++++++++++++++")
+
         for sort in sorts:
             values[sort] = model.get_universe(sort)
+            print("type %s : %s" % (str(sort), str(values[sort])))
 
         keys_to_string_map = dict()
         for d in model:
             keys_to_string_map[d.name()] = d
+
         print("++++++++++++++++++++++++")
         print("+++++++ globals: +++++++")
         print("++++++++++++++++++++++++")
@@ -433,16 +440,14 @@ if __name__ == '__main__':
 
 
     N = 3
-    x, y, l, h, x0, z = Consts('x y l h x0 z', A)
-    init    = And(x == h, Implies(n(h, y), nPlus(y, l)))
-    rho     = And(nPlus(x0, x), ForAll([z], Implies(nPlus(x,z),n(x0,z))))
+    x, y, l, null, x0, z1, z2, z3 = Consts('x y l null x0 z1, z2, z3', A)
+    init    = And(Not(x == null), Exists(z1, n(x,z)))
     bad     = And(x == y, x == l)
-    background = ForAll([z], n(z,z))
+    background = ForAll([z1,z2, z3], Implies(And(n(z1, z2), n(z2, z3), n(z1, z3))))
 
-    test = And(ForAll([x,y], Implies(x != y, Or(n(x,l), n(l,y)))), Exists(x, And(Not(n(x, h), Not(n(h, x))))))
-    globals = [y, l, h, n]    # @ReservedAssignment
-    locals  = [(x0,x)]  # @ReservedAssignment
-    print(test)
-    print(Z3ActiveBoundedVariables(active)(test))
-    #r_t_analyzer = Relaxed_Trace_Analyzer(init, rho, bad, background, globals, locals, [n], [], 3)
-    #r_t_analyzer.run()
+    phi_solver = Solver()
+    phi_solver.add(init)
+    phi_solver.add(background)
+    stat = phi_solver.check()
+    if stat == sat:
+        print(stat.model())
